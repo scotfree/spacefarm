@@ -1,0 +1,43 @@
+{
+    "map_width": 5,
+    "map_height": 5,
+    
+    "seedling_maturity_time": 3,
+    "new_bot_cost": 10,
+    "modify_deck_cost": 5,
+    
+    "victory_conditions": {
+        "MINERAL": 10,
+        "BIOMASS": 10,
+        "ENERGY": 10
+    },
+    
+    "initial_state": [
+        {"type": "ORE", "amount": 10, "x": 0, "y": 0},
+        {"type": "COAL", "amount": 2, "x": 1, "y": 1},
+        {"type": "COAL", "amount": 5, "x": 2, "y": 2},
+        {"type": "PLANT", "amount": 3, "x": 3, "y": 3},
+        {"type": "PLANT", "amount": 3, "x": 4, "y": 4}
+    ],
+    
+    "controllers": [
+        {
+            "id": "player1",
+            "resources": {
+                "MINERAL": 0,
+                "BIOMASS": 0,
+                "ENERGY": 10
+            },
+            "bots": [
+                {
+                    "x": 2,
+                    "y": 2,
+                    "deck": [
+                        {"type": "HARVEST", "parameter": "COAL"},
+                        {"type": "MOVE", "parameter": "RANDOM"}
+                    ]
+                }
+            ]
+        }
+    ]
+} 
