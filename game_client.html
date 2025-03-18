@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpaceDew Game Client</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .panel {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        pre {
+            background-color: #f8f8f8;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
+        #apiUrl {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        .game-grid {
+            display: grid;
+            gap: 2px;
+            background-color: #333;
+            padding: 2px;
+            font-family: monospace;
+        }
+        .cell {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            position: relative;
+            background-color: #9BA2A7;
+            overflow: hidden;
+        }
+        .coordinates {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            color: #999;
+            font-size: 10px;
+        }
+        .bot-label {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 1px 3px;
+            border-radius: 3px;
+            font-size: 10px;
+        }
+        .asset-label {
+            color: white;
+            text-align: center;
+            margin: 2px 0;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>SpaceDew Game Client</h1>
+    
+    <div class="form-group">
+        <label for="apiUrl">API URL:</label>
+        <input type="text" id="apiUrl" value="http://localhost:8000" />
+    </div>
+
+    <div class="container">
+        <div class="panel">
+            <h2>Game Grid</h2>
+            <div id="gridDisplay"></div>
+            <div id="stateSummary" style="font-family: monospace; margin: 10px 0;"></div>
+            <button onclick="refreshGameState()">Refresh State</button>
+        </div>
+
+        <div class="panel">
+            <h2>Submit Turn Order</h2>
+            <div class="controls">
+                <div class="form-group">
+                    <label for="controllerId">Controller ID:</label>
+                    <input type="number" id="controllerId" value="0" min="0" />
+                </div>
+
+                <div class="form-group">
+                    <label for="actionType">Action Type:</label>
+                    <select id="actionType">
+                        <option value="TAKE_BOT_ACTIONS">Take Bot Actions</option>
+                        <option value="MODIFY_DECK">Modify Deck</option>
+                        <option value="CREATE_BOT">Create Bot</option>
+                    </select>
+                </div>
+
+                <div id="parametersContainer">
+                    <!-- Dynamic parameters will be inserted here based on action type -->
+                </div>
+
+                <button onclick="submitTurn()">Submit Turn</button>
+            </div>
+            <div id="turnResponse" class="error"></div>
+        </div>
+
+        <div class="panel">
+            <h2>Raw Game State</h2>
+            <div class="json-container">
+                <pre id="gameState">Loading...</pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Asset type colors
+        const ASSET_COLORS = {
+            'ORE': "#D4A76A",
+            'PLANT': "#228B22",
+            'COAL': "#463E3F",
+            'ORE_SEEDLING': "#F0D5A9",
+            'PLANT_SEEDLING': "#98FB98",
+            'COAL_SEEDLING': "#8C8687"
+        };
+
+        // Initialize parameters for different action types
+        const actionParameters = {
+            'TAKE_BOT_ACTIONS': `
+                <div class="form-group">
+                    <label for="energyPoints">Energy Points:</label>
+                    <input type="number" id="energyPoints" value="1" min="1" max="5" />
+                </div>
+            `,
+            'MODIFY_DECK': `
+                <div class="form-group">
+                    <label for="botId">Bot ID:</label>
+                    <input type="number" id="botId" value="0" min="0" />
+                </div>
+                <div class="form-group">
+                    <label for="cardActionType">Card Action Type:</label>
+                    <select id="cardActionType">
+                        <option value="MOVE">Move</option>
+                        <option value="HARVEST">Harvest</option>
+                        <option value="PLANT">Plant</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="cardParameter">Parameter:</label>
+                    <select id="cardParameter">
+                        <option value="NORTH">North</option>
+                        <option value="SOUTH">South</option>
+                        <option value="EAST">East</option>
+                        <option value="WEST">West</option>
+                        <option value="RANDOM">Random</option>
+                    </select>
+                </div>
+            `,
+            'CREATE_BOT': '' // No parameters needed
+        };
+
+        // Update parameters form based on selected action type
+        document.getElementById('actionType').addEventListener('change', function() {
+            const container = document.getElementById('parametersContainer');
+            container.innerHTML = actionParameters[this.value];
+            
+            // Add parameter type change handler for MODIFY_DECK
+            if (this.value === 'MODIFY_DECK') {
+                document.getElementById('cardActionType').addEventListener('change', updateCardParameters);
+            }
+        });
+
+        // Update card parameters based on card action type
+        function updateCardParameters() {
+            const actionType = document.getElementById('cardActionType').value;
+            const paramSelect = document.getElementById('cardParameter');
+            
+            if (actionType === 'MOVE') {
+                paramSelect.innerHTML = `
+                    <option value="NORTH">North</option>
+                    <option value="SOUTH">South</option>
+                    <option value="EAST">East</option>
+                    <option value="WEST">West</option>
+                    <option value="RANDOM">Random</option>
+                `;
+            } else {
+                paramSelect.innerHTML = `
+                    <option value="ORE">Ore</option>
+                    <option value="PLANT">Plant</option>
+                    <option value="COAL">Coal</option>
+                `;
+            }
+        }
+
+        // Initialize with default action type parameters
+        document.getElementById('parametersContainer').innerHTML = 
+            actionParameters[document.getElementById('actionType').value];
+
+        function generateGameStateSummary(gameState) {
+            let summary = [];
+            
+            // Add turn counter
+            summary.push(`Turn: ${gameState.turn}`);
+            
+            // Add event log
+            if (gameState.event_log && gameState.event_log.length > 0) {
+                summary.push('<br>Event Log:');
+                // Show last 5 events in reverse chronological order
+                const recentEvents = gameState.event_log.slice(-5).reverse();
+                for (const event of recentEvents) {
+                    summary.push(`<br>Turn ${event.turn}: ${event.message}`);
+                }
+                summary.push('<br>');
+            }
+            
+            // Add controller information
+            for (const controller of gameState.controllers) {
+                summary.push(`<br>Controller ${controller.id}:`);
+                summary.push(`<br>Bots: ${controller.bots.length}`);
+                
+                // Add deck information for each bot
+                controller.bots.forEach((bot, i) => {
+                    summary.push(`<br>Bot ${i} deck: [`);
+                    const cardLabels = bot.deck.map(card => {
+                        if (card.action_type === 'MOVE') {
+                            if (card.parameter === 'RANDOM') {
+                                return 'M?';  // Random move shown as M?
+                            }
+                            return `M${card.parameter[0]}`; // M[N/S/E/W]
+                        } else if (card.action_type === 'HARVEST') {
+                            return `H${card.parameter[0]}`; // H[O/P/C]
+                        } else if (card.action_type === 'PLANT') {
+                            return `P${card.parameter[0]}`; // P[O/P/C]
+                        }
+                        return '?';
+                    });
+                    summary.push(cardLabels.join(' ') + ']');
+                });
+                
+                // Add resources
+                summary.push('<br>Resources:');
+                for (const [resourceType, amount] of Object.entries(controller.resources)) {
+                    summary.push(`<br> - ${resourceType}: ${amount}`);
+                }
+            }
+            
+            // Add victory conditions
+            summary.push('<br><br>Victory Conditions:');
+            for (const [resourceType, amount] of Object.entries(gameState.victory_conditions)) {
+                summary.push(`<br> - ${resourceType}: ${amount}`);
+            }
+            
+            return summary.join('\n');
+        }
+
+        function renderGameGrid(gameState) {
+            const gridContainer = document.getElementById('gridDisplay');
+            const width = gameState.map_size.width;
+            const height = gameState.map_size.height;
+            
+            // Set grid columns
+            gridContainer.innerHTML = '';
+            gridContainer.className = 'game-grid';
+            gridContainer.style.gridTemplateColumns = `repeat(${width}, 60px)`;
+            
+            // Create cells
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    const cell = gameState.map[y][x];
+                    const cellDiv = document.createElement('div');
+                    cellDiv.className = 'cell';
+                    
+                    // Set background color based on assets
+                    if (cell.assets.length > 0) {
+                        const assetType = cell.assets[0].type;
+                        cellDiv.style.backgroundColor = ASSET_COLORS[assetType] || '#9BA2A7';
+                    }
+                    
+                    // Add coordinates
+                    const coords = document.createElement('div');
+                    coords.className = 'coordinates';
+                    coords.textContent = `(${x},${y})`;
+                    cellDiv.appendChild(coords);
+                    
+                    // Add bot label if there are bots
+                    if (cell.bots.length > 0) {
+                        const botCounts = {};
+                        cell.bots.forEach(bot => {
+                            botCounts[bot.controller_id] = (botCounts[bot.controller_id] || 0) + 1;
+                        });
+                        
+                        const botLabel = document.createElement('div');
+                        botLabel.className = 'bot-label';
+                        const labels = [];
+                        for (const [controllerId, count] of Object.entries(botCounts)) {
+                            labels.push(count > 1 ? `C${controllerId}×${count}` : `C${controllerId}`);
+                        }
+                        botLabel.textContent = labels.join(' ');
+                        cellDiv.appendChild(botLabel);
+                    }
+                    
+                    // Add asset labels
+                    cell.assets.forEach(asset => {
+                        const assetLabel = document.createElement('div');
+                        assetLabel.className = 'asset-label';
+                        const shortType = asset.type.split('_')[0].substring(0, 3);
+                        assetLabel.textContent = asset.maturity_time !== null 
+                            ? `${shortType}(${asset.maturity_time})`
+                            : `${shortType}×${asset.amount}`;
+                        cellDiv.appendChild(assetLabel);
+                    });
+                    
+                    gridContainer.appendChild(cellDiv);
+                }
+            }
+        }
+
+        async function getGameState() {
+            const apiUrl = document.getElementById('apiUrl').value;
+            try {
+                const response = await fetch(`${apiUrl}/game/state`);
+                if (!response.ok) throw new Error('Failed to fetch game state');
+                const data = await response.json();
+                
+                // Update the displays
+                renderGameGrid(data);
+                document.getElementById('stateSummary').innerHTML = generateGameStateSummary(data);
+                document.getElementById('gameState').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('gridDisplay').textContent = 'Error: ' + error.message;
+                document.getElementById('stateSummary').textContent = '';
+                document.getElementById('gameState').textContent = 'Error: ' + error.message;
+            }
+        }
+
+        async function submitTurn() {
+            const apiUrl = document.getElementById('apiUrl').value;
+            const actionType = document.getElementById('actionType').value;
+            const controllerId = parseInt(document.getElementById('controllerId').value);
+            
+            let parameters = {};
+            
+            // Build parameters based on action type
+            if (actionType === 'TAKE_BOT_ACTIONS') {
+                parameters = {
+                    energy_points: parseInt(document.getElementById('energyPoints').value)
+                };
+            } else if (actionType === 'MODIFY_DECK') {
+                parameters = {
+                    bot_id: parseInt(document.getElementById('botId').value),
+                    cards: [{
+                        action_type: document.getElementById('cardActionType').value,
+                        parameter: document.getElementById('cardParameter').value
+                    }]
+                };
+            }
+            
+            const turnOrder = {
+                orders: [{
+                    controller_id: controllerId,
+                    action_type: actionType,
+                    parameters: parameters
+                }]
+            };
+
+            try {
+                const response = await fetch(`${apiUrl}/game/turn`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(turnOrder)
+                });
+
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.detail || 'Failed to submit turn');
+                }
+
+                // Update all displays
+                renderGameGrid(data);
+                document.getElementById('stateSummary').innerHTML = generateGameStateSummary(data);
+                document.getElementById('gameState').textContent = JSON.stringify(data, null, 2);
+                document.getElementById('turnResponse').textContent = '';
+            } catch (error) {
+                document.getElementById('turnResponse').textContent = 'Error: ' + error.message;
+            }
+        }
+
+        function refreshGameState() {
+            getGameState();
+        }
+
+        // Initial game state load
+        getGameState();
+    </script>
+</body>
+</html> 
