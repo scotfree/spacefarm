@@ -117,21 +117,21 @@ class GameInterface:
         """Generate a summary of game state including resources and victory conditions"""
         summary = ["<div style='font-family: monospace; margin: 10px 0;'>"]
         
-        # Add turn counter
-        summary.append(f"Turn: {game.turn}<br>")
+        # Add day and hour counter
+        summary.append(f"Day {game.day}, Hour {game.hour}<br>")
         
         # Add event log
         if game.event_log:
             summary.append("<br>Event Log:")
             # Show last 5 events in reverse chronological order
             for event in reversed(game.event_log[-5:]):
-                summary.append(f"<br>Turn {event['turn']}: {event['message']}")
+                summary.append(f"<br>Day {event['day']}, Hour {event['hour']}: {event['message']}")
             summary.append("<br>")
         
         # Add controller information
         for controller in game.controllers:
-            summary.append(f"<br>Controller {controller.id}:")
-            summary.append(f"<br>Bots: {len(controller.bots)}")
+            #summary.append(f"<br>Controller {controller.id}:")
+            #summary.append(f"<br>Bots: {len(controller.bots)}")
             
             # Add deck information for each bot
             for i, bot in enumerate(controller.bots):
@@ -237,12 +237,15 @@ class GameInterface:
     def get_game_state(self) -> dict:
         """Returns a complete representation of the game state in JSON format."""
         state = {
-            'turn': self.game.turn,
+            'day': self.game.day,
+            'hour': self.game.hour,
+            'hours_per_day': self.game.hours_per_day,
             'map_size': {
                 'width': self.game.width,
                 'height': self.game.height
             },
             'costs': self.game.costs,
+            'hour_costs': self.game.hour_costs,
             'victory_conditions': {
                 resource_type.name: amount 
                 for resource_type, amount in self.game.victory_conditions.items()

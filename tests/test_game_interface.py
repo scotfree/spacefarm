@@ -129,10 +129,9 @@ class TestGameInterface(unittest.TestCase):
     def test_game_state_summary(self):
         summary = GameInterface.get_game_state_summary(self.game)
         
-        # Check turn counter
-        self.assertIn('Turn: 0', summary
-                      
-                      )
+        # Check day and hour
+        self.assertIn('Day 0', summary)
+        self.assertIn('Hour 0', summary)
         
         # Check resource display
         self.assertIn('MINERAL: 5', summary)

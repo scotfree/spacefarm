@@ -4,79 +4,196 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SpaceDew Game Client</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Roboto:wght@700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
+        :root {
+            --base-dark: #1a1f2c;
+            --base-medium: #2d3446;
+            --base-light: #3d465e;
+            --neon-green: #39ff14;
+            --neon-green-dim: #2ab50f;
+            --retro-orange: #ff8b3d;
+            --text-color: #d4e5f9;
+            --border-glow: 0 0 5px var(--neon-green);
         }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--base-dark);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        h1, h2 {
+            font-family: 'Share Tech Mono', monospace;
+            color: var(--neon-green);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px var(--neon-green-dim);
+        }
+
         .container {
             display: flex;
             flex-direction: column;
             gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
         }
+
         .panel {
-            background: white;
+            background: var(--base-medium);
             padding: 20px;
+            border: 2px solid var(--base-light);
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.3);
+            position: relative;
         }
+
+        .panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, 
+                transparent, 
+                var(--neon-green-dim),
+                transparent
+            );
+        }
+
+        .top-section {
+            display: flex;
+            gap: 20px;
+        }
+
+        .left-column {
+            width: 20%;
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .right-column {
+            flex-grow: 1;
+        }
+
+        .scrollable-summary {
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 15px;
+            border: 1px solid var(--neon-green-dim);
+            border-radius: 4px;
+            background: var(--base-dark);
+            font-family: 'Share Tech Mono', monospace;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        .scrollable-summary::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        .scrollable-summary::-webkit-scrollbar-track {
+            background: var(--base-dark);
+            border-radius: 6px;
+        }
+
+        .scrollable-summary::-webkit-scrollbar-thumb {
+            background: var(--base-light);
+            border-radius: 6px;
+            border: 2px solid var(--base-dark);
+        }
+
         .controls {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 15px;
         }
+
         .form-group {
             margin-bottom: 15px;
         }
+
         label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
             font-weight: bold;
+            color: var(--retro-orange);
+            text-transform: uppercase;
+            font-size: 0.9em;
+            letter-spacing: 1px;
         }
+
         input, select {
             width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
+            padding: 10px;
+            background: var(--base-dark);
+            border: 2px solid var(--base-light);
             border-radius: 4px;
-            box-sizing: border-box;
+            color: var(--text-color);
+            font-family: 'Share Tech Mono', monospace;
+            transition: all 0.3s ease;
         }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--neon-green);
+            box-shadow: var(--border-glow);
+        }
+
         button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 15px;
-            border: none;
+            background-color: var(--base-light);
+            color: var(--neon-green);
+            padding: 12px 20px;
+            border: 2px solid var(--neon-green);
             border-radius: 4px;
             cursor: pointer;
+            font-family: 'Share Tech Mono', monospace;
             font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
+
         button:hover {
-            background-color: #45a049;
+            background-color: var(--neon-green);
+            color: var(--base-dark);
+            box-shadow: var(--border-glow);
         }
-        pre {
-            background-color: #f8f8f8;
-            padding: 15px;
-            border-radius: 4px;
-            overflow-x: auto;
-            white-space: pre-wrap;
+
+        button:active {
+            transform: translateY(1px);
         }
+
         .error {
-            color: red;
+            color: #ff4444;
             margin-top: 10px;
+            font-family: 'Share Tech Mono', monospace;
+            text-shadow: 0 0 5px rgba(255,68,68,0.5);
         }
+
         #apiUrl {
             width: 100%;
             margin-bottom: 20px;
+            font-family: 'Share Tech Mono', monospace;
         }
+
         .game-grid {
             display: grid;
-            gap: 2px;
-            background-color: #333;
-            padding: 2px;
-            font-family: monospace;
+            gap: 3px;
+            background-color: var(--base-light);
+            padding: 3px;
+            border: 2px solid var(--neon-green-dim);
+            border-radius: 8px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.3);
         }
+
         .cell {
             width: 60px;
             height: 60px;
@@ -86,226 +203,595 @@
             align-items: center;
             font-size: 12px;
             position: relative;
-            background-color: #9BA2A7;
-            overflow: hidden;
+            background-color: var(--base-medium);
+            border: 1px solid var(--base-light);
+            transition: all 0.3s ease;
         }
+
+        .cell:hover {
+            transform: scale(1.05);
+            z-index: 1;
+            box-shadow: 0 0 10px rgba(57, 255, 20, 0.3);
+        }
+
         .coordinates {
             position: absolute;
             top: 2px;
             left: 2px;
-            color: #999;
+            color: var(--text-color);
             font-size: 10px;
+            font-family: 'Share Tech Mono', monospace;
+            opacity: 0.7;
         }
+
         .bot-label {
             position: absolute;
             top: 2px;
             right: 2px;
-            background-color: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 1px 3px;
+            background-color: var(--base-dark);
+            color: var(--neon-green);
+            padding: 2px 4px;
             border-radius: 3px;
             font-size: 10px;
+            font-family: 'Share Tech Mono', monospace;
+            border: 1px solid var(--neon-green-dim);
         }
+
         .asset-label {
-            color: white;
+            color: var(--text-color);
             text-align: center;
             margin: 2px 0;
             font-weight: bold;
+            font-family: 'Share Tech Mono', monospace;
+            text-shadow: 
+                -1px -1px 2px rgba(0,0,0,0.7),
+                1px -1px 2px rgba(0,0,0,0.7),
+                -1px 1px 2px rgba(0,0,0,0.7),
+                1px 1px 2px rgba(0,0,0,0.7);
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 2px 4px;
+            border-radius: 2px;
+        }
+
+        pre {
+            background-color: var(--base-dark);
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            font-family: 'Share Tech Mono', monospace;
+            border: 1px solid var(--base-light);
+            color: var(--text-color);
+        }
+
+        /* Radio button styling */
+        input[type="radio"] {
+            width: auto;
+            margin-right: 8px;
+        }
+
+        input[type="radio"] + label {
+            display: inline;
+            color: var(--text-color);
+            text-transform: none;
+            font-weight: normal;
+        }
+
+        .restart-button {
+            margin-left: 10px;
+            background-color: var(--retro-orange);
+            color: var(--base-dark);
+        }
+        
+        .restart-button:hover {
+            background-color: var(--neon-green);
+            color: var(--base-dark);
+        }
+
+        .bottom-section {
+            background: var(--base-medium);
+            padding: 20px;
+            border: 2px solid var(--base-light);
+            border-radius: 8px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        .toggle-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .toggle-button {
+            background-color: var(--base-dark);
+            color: var(--neon-green);
+            padding: 12px 20px;
+            border: 2px solid var(--neon-green-dim);
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Share Tech Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+        .toggle-button.active {
+            background-color: var(--neon-green);
+            color: var(--base-dark);
+            box-shadow: var(--border-glow);
+        }
+        #eventLog, #rawState {
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 15px;
+            background: var(--base-dark);
+            border: 1px solid var(--neon-green-dim);
+            border-radius: 4px;
+            font-family: 'Share Tech Mono', monospace;
+            color: var(--text-color);
         }
     </style>
 </head>
 <body>
-    <h1>SpaceDew Game Client</h1>
-    
-    <div class="form-group">
-        <label for="apiUrl">API URL:</label>
-        <input type="text" id="apiUrl" value="http://localhost:8000" />
-    </div>
-
     <div class="container">
-        <div class="panel">
-            <h2>Game Grid</h2>
-            <div id="gridDisplay"></div>
-            <div id="stateSummary" style="font-family: monospace; margin: 10px 0;"></div>
-            <button onclick="refreshGameState()">Refresh State</button>
+        <h1>SpaceDew Game Client</h1>
+        
+        <div class="top-section">
+            <div class="left-column">
+                <div id="error" class="error"></div>
+                <div class="panel">
+                    <h2>Game Status</h2>
+                    
+                    <div id="gameStatus" class="scrollable-summary">
+                        <!-- Game status will be inserted here -->
+                    </div>
+                </div>
+
+                <div class="panel controls">
+                    <h2>Controls</h2>
+                    <div class="form-group">
+                        <label for="controllerId">Controller ID:</label>
+                        <input type="number" id="controllerId" value="0" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="actionType">Action Type:</label>
+                        <select id="actionType">
+                            <option value="TAKE_BOT_ACTIONS">Take Bot Actions</option>
+                            <option value="MODIFY_DECK">Modify Deck</option>
+                            <option value="CREATE_BOT">Create Bot</option>
+                        </select>
+                    </div>
+                    <div id="actionParameters">
+                        <!-- Action parameters will be inserted here -->
+                    </div>
+                    <button onclick="submitTurn()">Submit Action</button>
+                    
+                    <div class="form-group">
+                        <label for="levelSelect">Level:</label>
+                        <select id="levelSelect"></select>
+                        <button onclick="restartGame()" class="restart-button">Restart Level</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-column">
+                <div class="panel">
+                    <h2>Game Grid</h2>
+                    <div id="gameGrid">
+                        <!-- Game grid will be inserted here -->
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="panel">
-            <h2>Submit Turn Order</h2>
-            <div class="controls">
-                <div class="form-group">
-                    <label for="controllerId">Controller ID:</label>
-                    <input type="number" id="controllerId" value="0" min="0" />
-                </div>
-
-                <div class="form-group">
-                    <label for="actionType">Action Type:</label>
-                    <select id="actionType">
-                        <option value="TAKE_BOT_ACTIONS">Take Bot Actions</option>
-                        <option value="MODIFY_DECK">Modify Deck</option>
-                        <option value="CREATE_BOT">Create Bot</option>
-                    </select>
-                </div>
-
-                <div id="parametersContainer">
-                    <!-- Dynamic parameters will be inserted here based on action type -->
-                </div>
-
-                <button onclick="submitTurn()">Submit Turn</button>
+        <div class="bottom-section">
+            <div class="toggle-container">
+                <button class="toggle-button active" onclick="toggleView('eventLog')">Event Log</button>
+                <button class="toggle-button" onclick="toggleView('rawState')">Raw State</button>
             </div>
-            <div id="turnResponse" class="error"></div>
-        </div>
-
-        <div class="panel">
-            <h2>Raw Game State</h2>
-            <div class="json-container">
-                <pre id="gameState">Loading...</pre>
-            </div>
+            <div id="eventLog"><!-- Event log will be inserted here --></div>
+            <div id="rawState" style="display: none;"><!-- Raw state will be inserted here --></div>
         </div>
     </div>
 
     <script>
         // Asset type colors
         const ASSET_COLORS = {
-            'ORE': "#D4A76A",
-            'PLANT': "#228B22",
-            'COAL': "#463E3F",
-            'ORE_SEEDLING': "#F0D5A9",
-            'PLANT_SEEDLING': "#98FB98",
-            'COAL_SEEDLING': "#8C8687"
+            'ORE': "#c17f59",      // Muted brownish orange
+            'PLANT': "#1a9922",    // Darker, more muted green
+            'COAL': "#151820",     // Very dark blue-black
+            'ORE_SEEDLING': "#8b5b3f",  // Darker brown
+            'PLANT_SEEDLING': "#0f5913", // Dark green
+            'COAL_SEEDLING': "#0a0c10"   // Darkest blue-black
         };
 
-        // Initialize parameters for different action types
+        // Add action parameters for each action type
         const actionParameters = {
             'TAKE_BOT_ACTIONS': `
                 <div class="form-group">
-                    <label for="energyPoints">Energy Points:</label>
-                    <input type="number" id="energyPoints" value="1" min="1" max="5" />
+                    <label>Energy Points (1 hour each):</label>
+                    <input type="number" id="energyPoints" min="1" max="5" value="1">
                 </div>
             `,
             'MODIFY_DECK': `
                 <div class="form-group">
-                    <label for="botId">Bot ID:</label>
-                    <input type="number" id="botId" value="0" min="0" />
+                    <label>Bot ID (1 hour):</label>
+                    <input type="number" id="botId" min="0" value="0">
                 </div>
                 <div class="form-group">
-                    <label for="cardActionType">Card Action Type:</label>
-                    <select id="cardActionType">
-                        <option value="MOVE">Move</option>
-                        <option value="HARVEST">Harvest</option>
-                        <option value="PLANT">Plant</option>
-                    </select>
+                    <label>Modification Type:</label><br>
+                    <input type="radio" name="modType" value="add" id="addCard" checked>
+                    <label for="addCard">Add Card</label>
+                    <input type="radio" name="modType" value="remove" id="removeCard">
+                    <label for="removeCard">Remove Card</label>
                 </div>
-                <div class="form-group">
-                    <label for="cardParameter">Parameter:</label>
-                    <select id="cardParameter">
-                        <option value="NORTH">North</option>
-                        <option value="SOUTH">South</option>
-                        <option value="EAST">East</option>
-                        <option value="WEST">West</option>
-                        <option value="RANDOM">Random</option>
-                    </select>
+                <div id="addCardInputs">
+                    <div class="form-group">
+                        <label>Action Type:</label>
+                        <select id="cardActionType">
+                            <option value="MOVE">Move</option>
+                            <option value="HARVEST">Harvest</option>
+                            <option value="PLANT">Plant</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="moveParameters">
+                        <label>Direction:</label>
+                        <select id="direction">
+                            <option value="NORTH">North</option>
+                            <option value="SOUTH">South</option>
+                            <option value="EAST">East</option>
+                            <option value="WEST">West</option>
+                            <option value="RANDOM">Random</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="assetParameters" style="display: none;">
+                        <label>Asset Type:</label>
+                        <select id="assetType">
+                            <option value="ORE">Ore</option>
+                            <option value="PLANT">Plant</option>
+                            <option value="COAL">Coal</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="removeCardInputs" style="display: none;">
+                    <div class="form-group">
+                        <label>Card to Remove:</label>
+                        <select id="cardToRemove"></select>
+                    </div>
                 </div>
             `,
-            'CREATE_BOT': '' // No parameters needed
+            'CREATE_BOT': `
+                <div class="form-group">
+                    <label>Create Bot (6 hours):</label>
+                    <p>New bot will be created at controller's starting position.</p>
+                </div>
+            `
         };
+
+        // Store current game state
+        let currentGameState = null;
+
+        function formatCard(card) {
+            const actionType = card.action_type;
+            const param = card.parameter;
+            
+            if (actionType === 'MOVE') {
+                return `Move ${param === 'RANDOM' ? 'Random' : param.toLowerCase()}`;
+            } else if (actionType === 'HARVEST') {
+                return `Harvest ${param.toLowerCase()}`;
+            } else if (actionType === 'PLANT') {
+                return `Plant ${param.toLowerCase()}`;
+            }
+            return 'Unknown card';
+        }
+
+        function updateCardList() {
+            if (!currentGameState) return;
+            
+            const botId = parseInt(document.getElementById('botId').value);
+            const controller = currentGameState.controllers[0]; // Assuming we're working with the first controller
+            const select = document.getElementById('cardToRemove');
+            
+            if (!controller || botId >= controller.bots.length) {
+                select.innerHTML = '<option value="">No bot found</option>';
+                return;
+            }
+            
+            const bot = controller.bots[botId];
+            select.innerHTML = bot.deck.map((card, index) => 
+                `<option value="${index}">[${index}] ${formatCard(card)}</option>`
+            ).join('');
+        }
 
         // Update parameters form based on selected action type
         document.getElementById('actionType').addEventListener('change', function() {
-            const container = document.getElementById('parametersContainer');
+            const container = document.getElementById('actionParameters');
             container.innerHTML = actionParameters[this.value];
             
-            // Add parameter type change handler for MODIFY_DECK
             if (this.value === 'MODIFY_DECK') {
-                document.getElementById('cardActionType').addEventListener('change', updateCardParameters);
+                document.querySelectorAll('input[name="modType"]').forEach(radio => {
+                    radio.addEventListener('change', updateModificationInputs);
+                });
+                
+                const cardActionType = document.getElementById('cardActionType');
+                if (cardActionType) {
+                    cardActionType.addEventListener('change', updateCardParameters);
+                }
+                
+                updateModificationInputs();
             }
         });
 
-        // Update card parameters based on card action type
-        function updateCardParameters() {
-            const actionType = document.getElementById('cardActionType').value;
-            const paramSelect = document.getElementById('cardParameter');
+        function updateModificationInputs() {
+            const addInputs = document.getElementById('addCardInputs');
+            const removeInputs = document.getElementById('removeCardInputs');
+            const modType = document.querySelector('input[name="modType"]:checked').value;
             
-            if (actionType === 'MOVE') {
-                paramSelect.innerHTML = `
-                    <option value="NORTH">North</option>
-                    <option value="SOUTH">South</option>
-                    <option value="EAST">East</option>
-                    <option value="WEST">West</option>
-                    <option value="RANDOM">Random</option>
-                `;
+            if (modType === 'add') {
+                addInputs.style.display = 'block';
+                removeInputs.style.display = 'none';
+                updateCardParameters();
             } else {
-                paramSelect.innerHTML = `
-                    <option value="ORE">Ore</option>
-                    <option value="PLANT">Plant</option>
-                    <option value="COAL">Coal</option>
-                `;
+                addInputs.style.display = 'none';
+                removeInputs.style.display = 'block';
+                updateCardList();
             }
         }
 
-        // Initialize with default action type parameters
-        document.getElementById('parametersContainer').innerHTML = 
-            actionParameters[document.getElementById('actionType').value];
-
-        function generateGameStateSummary(gameState) {
-            let summary = [];
+        function updateCardParameters() {
+            const actionType = document.getElementById('cardActionType').value;
+            const moveParams = document.getElementById('moveParameters');
+            const assetParams = document.getElementById('assetParameters');
             
-            // Add turn counter
-            summary.push(`Turn: ${gameState.turn}`);
-            
-            // Add event log
-            if (gameState.event_log && gameState.event_log.length > 0) {
-                summary.push('<br>Event Log:');
-                // Show last 5 events in reverse chronological order
-                const recentEvents = gameState.event_log.slice(-5).reverse();
-                for (const event of recentEvents) {
-                    summary.push(`<br>Turn ${event.turn}: ${event.message}`);
-                }
-                summary.push('<br>');
+            if (actionType === 'MOVE') {
+                moveParams.style.display = 'block';
+                assetParams.style.display = 'none';
+            } else {
+                moveParams.style.display = 'none';
+                assetParams.style.display = 'block';
             }
+        }
+
+        function generateGameStatus(gameState) {
+            let status = [];
+            
+            // Add day and hour
+            status.push(`Day ${gameState.day}, Hour ${gameState.hour}`);
             
             // Add controller information
             for (const controller of gameState.controllers) {
-                summary.push(`<br>Controller ${controller.id}:`);
-                summary.push(`<br>Bots: ${controller.bots.length}`);
+                status.push(`<br><br>Controller ${controller.id}:`);
+                status.push(`<br>Bots: ${controller.bots.length}`);
                 
                 // Add deck information for each bot
                 controller.bots.forEach((bot, i) => {
-                    summary.push(`<br>Bot ${i} deck: [`);
-                    const cardLabels = bot.deck.map(card => {
+                    const deckStr = bot.deck.map(card => {
                         if (card.action_type === 'MOVE') {
-                            if (card.parameter === 'RANDOM') {
-                                return 'M?';  // Random move shown as M?
-                            }
-                            return `M${card.parameter[0]}`; // M[N/S/E/W]
+                            return card.parameter === 'RANDOM' ? 'M?' : `M${card.parameter[0]}`;
                         } else if (card.action_type === 'HARVEST') {
-                            return `H${card.parameter[0]}`; // H[O/P/C]
+                            return `H${card.parameter[0]}`;
                         } else if (card.action_type === 'PLANT') {
-                            return `P${card.parameter[0]}`; // P[O/P/C]
+                            return `P${card.parameter[0]}`;
                         }
-                        return '?';
-                    });
-                    summary.push(cardLabels.join(' ') + ']');
+                    }).join(' ');
+                    status.push(`<br>Bot ${i} deck: [${deckStr}]`);
                 });
                 
                 // Add resources
-                summary.push('<br>Resources:');
-                for (const [resourceType, amount] of Object.entries(controller.resources)) {
-                    summary.push(`<br> - ${resourceType}: ${amount}`);
+                status.push('<br>Resources:');
+                for (const [resource, amount] of Object.entries(controller.resources)) {
+                    status.push(`<br> - ${resource}: ${amount}`);
                 }
             }
             
             // Add victory conditions
-            summary.push('<br><br>Victory Conditions:');
-            for (const [resourceType, amount] of Object.entries(gameState.victory_conditions)) {
-                summary.push(`<br> - ${resourceType}: ${amount}`);
+            status.push('<br><br>Victory Conditions:');
+            for (const [resource, amount] of Object.entries(gameState.victory_conditions)) {
+                status.push(`<br> - ${resource}: ${amount}`);
             }
             
-            return summary.join('\n');
+            return status.join('');
+        }
+
+        function generateEventLog(gameState) {
+            if (!gameState.event_log || gameState.event_log.length === 0) {
+                return "No events yet.";
+            }
+
+            let log = [];
+            for (const event of gameState.event_log) {
+                log.push(`Day ${event.day}, Hour ${event.hour}: ${event.message}`);
+            }
+            return log.join('<br>');
+        }
+
+        function toggleView(viewId) {
+            const eventLog = document.getElementById('eventLog');
+            const rawState = document.getElementById('rawState');
+            const buttons = document.querySelectorAll('.toggle-button');
+            
+            if (viewId === 'eventLog') {
+                eventLog.style.display = 'block';
+                rawState.style.display = 'none';
+            } else {
+                eventLog.style.display = 'none';
+                rawState.style.display = 'block';
+            }
+            
+            buttons.forEach(button => {
+                button.classList.toggle('active', button.textContent.toLowerCase().includes(viewId.toLowerCase()));
+            });
+        }
+
+        // Initialize with default action type parameters
+        document.getElementById('actionParameters').innerHTML = 
+            actionParameters[document.getElementById('actionType').value];
+
+        async function getGameState() {
+            try {
+                const response = await fetch('/game/state');
+                if (!response.ok) {
+                    const error = await response.text();
+                    console.error('Failed to fetch game state:', error);
+                    throw new Error('Failed to fetch game state: ' + error);
+                }
+                const data = await response.json();
+                
+                // Store current game state
+                currentGameState = data;
+                
+                // Update the displays
+                renderGameGrid(data);
+                document.getElementById('gameStatus').innerHTML = generateGameStatus(data);
+                document.getElementById('eventLog').innerHTML = generateEventLog(data);
+                document.getElementById('rawState').textContent = JSON.stringify(data, null, 2);
+                
+                // Update card list if we're in remove mode
+                if (document.getElementById('actionType').value === 'MODIFY_DECK' &&
+                    document.querySelector('input[name="modType"]:checked')?.value === 'remove') {
+                    updateCardList();
+                }
+            } catch (error) {
+                console.error('Error in getGameState:', error);
+                document.getElementById('error').textContent = 'Error: ' + error.message;
+            }
+        }
+
+        async function submitTurn() {
+            const actionType = document.getElementById('actionType').value;
+            const controllerId = parseInt(document.getElementById('controllerId').value);
+            
+            let parameters = {};
+            let hourCost = 0;
+            
+            if (actionType === 'TAKE_BOT_ACTIONS') {
+                const energyPoints = parseInt(document.getElementById('energyPoints').value);
+                parameters = { energy_points: energyPoints };
+                hourCost = energyPoints; // 1 hour per energy point
+            }
+            else if (actionType === 'MODIFY_DECK') {
+                const botId = parseInt(document.getElementById('botId').value);
+                const modType = document.querySelector('input[name="modType"]:checked').value;
+                hourCost = 1; // 1 hour for deck modification
+                
+                parameters = {
+                    bot_id: botId
+                };
+
+                if (modType === 'add') {
+                    const actionType = document.getElementById('cardActionType').value;
+                    const parameter = actionType === 'MOVE' 
+                        ? document.getElementById('direction').value
+                        : document.getElementById('assetType').value;
+                    parameters.cards = [{
+                        action_type: actionType,
+                        parameter: parameter
+                    }];
+                } else {
+                    parameters.cards = [];
+                    parameters.remove_index = parseInt(document.getElementById('cardToRemove').value);
+                }
+            }
+            else if (actionType === 'CREATE_BOT') {
+                hourCost = 6; // 6 hours for new bot
+            }
+
+            // Check if we have enough hours
+            if (currentGameState && 
+                currentGameState.hour + hourCost > currentGameState.hours_per_day) {
+                document.getElementById('error').textContent = 
+                    `Not enough hours left in the day (need ${hourCost}, have ${currentGameState.hours_per_day - currentGameState.hour})`;
+                return;
+            }
+
+            try {
+                const response = await fetch('/game/turn', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        orders: [{
+                            controller_id: controllerId,
+                            action_type: actionType,
+                            parameters: parameters
+                        }]
+                    })
+                });
+
+                if (!response.ok) {
+                    const error = await response.text();
+                    document.getElementById('error').textContent = error;
+                    return;
+                }
+
+                // Clear error message if successful
+                document.getElementById('error').textContent = '';
+                
+                // Refresh game state
+                await getGameState();
+                
+            } catch (error) {
+                document.getElementById('error').textContent = error.message;
+            }
+        }
+
+        // Add level management functions
+        async function loadLevels() {
+            try {
+                const response = await fetch('/game/levels');
+                if (!response.ok) {
+                    const error = await response.text();
+                    console.error('Failed to fetch levels:', error);
+                    throw new Error('Failed to fetch levels: ' + error);
+                }
+                const data = await response.json();
+                
+                // Update level select dropdown
+                const levelSelect = document.getElementById('levelSelect');
+                levelSelect.innerHTML = data.levels.map(level => 
+                    `<option value="${level}" ${level === data.current_level ? 'selected' : ''}>${level}</option>`
+                ).join('');
+            } catch (error) {
+                console.error('Error loading levels:', error);
+                document.getElementById('error').textContent = 'Error loading levels: ' + error.message;
+            }
+        }
+
+        async function restartGame() {
+            const level = document.getElementById('levelSelect').value;
+            try {
+                const response = await fetch(`/game/restart?level=${level}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                if (!response.ok) {
+                    const error = await response.text();
+                    console.error('Failed to restart game:', error);
+                    document.getElementById('error').textContent = error;
+                    return;
+                }
+
+                // Clear error message if successful
+                document.getElementById('error').textContent = '';
+                
+                // Update game state
+                const data = await response.json();
+                currentGameState = data;
+                renderGameGrid(data);
+                document.getElementById('gameStatus').innerHTML = generateGameStatus(data);
+                document.getElementById('eventLog').innerHTML = generateEventLog(data);
+                document.getElementById('rawState').textContent = JSON.stringify(data, null, 2);
+                
+            } catch (error) {
+                console.error('Error restarting game:', error);
+                document.getElementById('error').textContent = error.message;
+            }
         }
 
         function renderGameGrid(gameState) {
-            const gridContainer = document.getElementById('gridDisplay');
+            const gridContainer = document.getElementById('gameGrid');
             const width = gameState.map_size.width;
             const height = gameState.map_size.height;
             
@@ -366,84 +852,8 @@
             }
         }
 
-        async function getGameState() {
-            const apiUrl = document.getElementById('apiUrl').value;
-            try {
-                const response = await fetch(`${apiUrl}/game/state`);
-                if (!response.ok) throw new Error('Failed to fetch game state');
-                const data = await response.json();
-                
-                // Update the displays
-                renderGameGrid(data);
-                document.getElementById('stateSummary').innerHTML = generateGameStateSummary(data);
-                document.getElementById('gameState').textContent = JSON.stringify(data, null, 2);
-            } catch (error) {
-                document.getElementById('gridDisplay').textContent = 'Error: ' + error.message;
-                document.getElementById('stateSummary').textContent = '';
-                document.getElementById('gameState').textContent = 'Error: ' + error.message;
-            }
-        }
-
-        async function submitTurn() {
-            const apiUrl = document.getElementById('apiUrl').value;
-            const actionType = document.getElementById('actionType').value;
-            const controllerId = parseInt(document.getElementById('controllerId').value);
-            
-            let parameters = {};
-            
-            // Build parameters based on action type
-            if (actionType === 'TAKE_BOT_ACTIONS') {
-                parameters = {
-                    energy_points: parseInt(document.getElementById('energyPoints').value)
-                };
-            } else if (actionType === 'MODIFY_DECK') {
-                parameters = {
-                    bot_id: parseInt(document.getElementById('botId').value),
-                    cards: [{
-                        action_type: document.getElementById('cardActionType').value,
-                        parameter: document.getElementById('cardParameter').value
-                    }]
-                };
-            }
-            
-            const turnOrder = {
-                orders: [{
-                    controller_id: controllerId,
-                    action_type: actionType,
-                    parameters: parameters
-                }]
-            };
-
-            try {
-                const response = await fetch(`${apiUrl}/game/turn`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(turnOrder)
-                });
-
-                const data = await response.json();
-                
-                if (!response.ok) {
-                    throw new Error(data.detail || 'Failed to submit turn');
-                }
-
-                // Update all displays
-                renderGameGrid(data);
-                document.getElementById('stateSummary').innerHTML = generateGameStateSummary(data);
-                document.getElementById('gameState').textContent = JSON.stringify(data, null, 2);
-                document.getElementById('turnResponse').textContent = '';
-            } catch (error) {
-                document.getElementById('turnResponse').textContent = 'Error: ' + error.message;
-            }
-        }
-
-        function refreshGameState() {
-            getGameState();
-        }
-
-        // Initial game state load
+        // Initialize game state and levels
+        loadLevels();
         getGameState();
     </script>
 </body>

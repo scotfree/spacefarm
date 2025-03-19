@@ -53,7 +53,8 @@ class TestGame(unittest.TestCase):
         self.assertEqual(self.game.height, 5)
         self.assertEqual(len(self.game.controllers), 1)
         self.assertEqual(len(self.game.controllers[0].bots), 1)
-        self.assertEqual(self.game.turn, 0)
+        self.assertEqual(self.game.day, 0)
+        self.assertEqual(self.game.hour, 0)
 
     def test_bot_movement(self):
         bot = self.game.controllers[0].bots[0]
@@ -160,6 +161,7 @@ class TestGame(unittest.TestCase):
             'modify_deck_cost': 5,
             'victory_conditions': {'MINERAL': 100},
             'initial_state': 'empty',
+            'hours_per_day': 24,
             'controllers': [
                 {
                     'resources': {'MINERAL': 20, 'BIOMASS': 20, 'ENERGY': 20},
@@ -187,12 +189,7 @@ class TestGame(unittest.TestCase):
                 'controller_id': 0,
                 'action_type': ControllerActionType.TAKE_BOT_ACTIONS,
                 'parameters': {'energy_points': 2}
-            }#,
-            # {
-            #     'controller_id': 0,
-            #     'action_type': ControllerActionType.CREATE_BOT,
-            #     'parameters': {}
-            # }
+            }
         ]
         
         # Process turn with orders
@@ -205,15 +202,16 @@ class TestGame(unittest.TestCase):
             "Energy points should be deducted"
         )
         
-        # Verify new bot was created
-        # self.assertEqual(
-        #     len(game.controllers[0].bots),
-        #     initial_bot_count + 1,
-        #     "A new bot should be created"
-        # )
+        # Verify hour counter increased
+        self.assertEqual(game.hour, 1, "Hour counter should increment")
+        self.assertEqual(game.day, 0, "Day should not increment yet")
         
-        # Verify turn counter increased
-        self.assertEqual(game.turn, 1, "Turn counter should increment")
+        # Test day increment
+        for _ in range(23):  # 23 more hours to complete the day
+            game.process_turn(turn_orders)
+        
+        self.assertEqual(game.hour, 0, "Hour should reset at day end")
+        self.assertEqual(game.day, 1, "Day should increment")
         
         # Test invalid controller ID
         invalid_orders = [{

@@ -14,8 +14,17 @@ class Game:
         self.height = config['map_height']
         self.map = [[Cell() for _ in range(self.width)] for _ in range(self.height)]
         self.controllers: List[Controller] = []
-        self.turn = 0
+        self.day = 0
+        self.hour = 0
+        self.hours_per_day = config.get('hours_per_day', 24)
         self.seedling_maturity_time = config['seedling_maturity_time']
+        
+        # Action hour costs
+        self.hour_costs = {
+            'bot_action': 1,
+            'modify_deck': 1,
+            'new_bot': 6
+        }
         
         # Store costs from config
         self.costs = {
@@ -38,13 +47,14 @@ class Game:
             'new_bot_cost': (1, 1000),
             'modify_deck_cost': (1, 1000),
             'victory_conditions': None,
-            'initial_state': None
+            'initial_state': None,
+            'hours_per_day': (1, 48)
         }
         
         for field, bounds in required_fields.items():
-            if field not in config:
+            if field not in config and field != 'hours_per_day':
                 raise ValueError(f"Missing required config field: {field}")
-            if bounds:
+            if bounds and field in config:
                 value = config[field]
                 if not isinstance(value, int) or value < bounds[0] or value > bounds[1]:
                     raise ValueError(f"{field} must be between {bounds[0]} and {bounds[1]}")
@@ -134,8 +144,13 @@ class Game:
         # Mature seedlings
         self.mature_seedlings()
         
-        # Increment turn counter
-        self.turn += 1
+        # Increment hour counter
+        self.hour += 1
+        
+        # Check if day is complete
+        if self.hour >= self.hours_per_day:
+            self.hour = 0
+            self.day += 1
         
         for controller in self.controllers[:]:  # Copy list to allow removal during iteration
             if controller.resources[ResourceType.ENERGY] <= 0:
@@ -371,9 +386,11 @@ class Game:
         """Add or remove a card from a bot's deck"""
         controller = self.controllers[bot.controller_id]
         
+        # Check if controller has enough biomass
         if controller.resources[ResourceType.BIOMASS] < self.costs['modify_deck']:
             raise ValueError("Not enough biomass to modify deck")
         
+        # Deduct cost from controller's resources
         controller.resources[ResourceType.BIOMASS] -= self.costs['modify_deck']
         
         if add_card is not None:
@@ -448,9 +465,10 @@ class Game:
             raise ValueError(f"Unknown action type: {action_type}")
 
     def log_event(self, message: str) -> None:
-        """Add an event to the log"""
+        """Add an event to the log with current day and hour"""
         self.event_log.append({
-            'turn': self.turn,
+            'day': self.day,
+            'hour': self.hour,
             'message': message
         })
 
@@ -460,20 +478,25 @@ class Game:
                 0 <= position.y < self.height)
 
     def process_controller_action(self, controller: Controller, action_type: ControllerActionType, parameters: Dict) -> None:
-        """Process a single controller action.
-        
-        Args:
-            controller: The controller taking the action
-            action_type: Type of action to take
-            parameters: Parameters for the action
-        
-        Raises:
-            ValueError: If the action parameters are invalid or the controller lacks resources
-        """
+        """Process a single controller action."""
+        # Calculate hour cost
+        hour_cost = 0
         if action_type == ControllerActionType.TAKE_BOT_ACTIONS:
             energy_points = parameters.get('energy_points')
             if energy_points is None:
                 raise ValueError("energy_points parameter required for TAKE_BOT_ACTIONS")
+            hour_cost = energy_points * self.hour_costs['bot_action']
+        elif action_type == ControllerActionType.MODIFY_DECK:
+            hour_cost = self.hour_costs['modify_deck']
+        elif action_type == ControllerActionType.CREATE_BOT:
+            hour_cost = self.hour_costs['new_bot']
+
+        # Check if we have enough hours left in the day
+        if not self.advance_time(hour_cost):
+            raise ValueError(f"Not enough hours left in the day for {action_type.name}")
+
+        # Process the action
+        if action_type == ControllerActionType.TAKE_BOT_ACTIONS:
             if energy_points > controller.get_total_resources():
                 raise ValueError(f"Insufficient resources for {energy_points} energy points")
             self.process_bot_actions(controller, energy_points)
@@ -481,31 +504,55 @@ class Game:
         elif action_type == ControllerActionType.MODIFY_DECK:
             bot_id = parameters.get('bot_id')
             cards = parameters.get('cards')
+            remove_index = parameters.get('remove_index')
             if bot_id is None or cards is None:
                 raise ValueError("bot_id and cards parameters required for MODIFY_DECK")
             if bot_id >= len(controller.bots):
                 raise ValueError(f"Invalid bot_id: {bot_id}")
-            if self.costs['modify_deck'] > controller.get_total_resources():
-                raise ValueError("Insufficient resources to modify deck")
+            if self.costs['modify_deck'] > controller.resources[ResourceType.BIOMASS]:
+                raise ValueError("Insufficient biomass to modify deck")
             
             bot = controller.bots[bot_id]
-            # Validate and add new cards to the bot's deck
-            for card in cards:
-                if not isinstance(card.action_type, ActionType) or not isinstance(card.parameter, (Direction, AssetType, ResourceType)):
-                    raise ValueError(f"Invalid card: {card}")
-            bot.deck.extend(cards)
-            # Deduct cost
-            controller.deduct_resources(self.costs['modify_deck'])
+            if remove_index is not None:
+                # Handle card removal
+                self.modify_deck(bot, remove_index=remove_index)
+            else:
+                # Handle card addition
+                for card_dict in cards:
+                    # Convert strings to enums
+                    try:
+                        action_type = ActionType[card_dict['action_type']]
+                        if action_type == ActionType.MOVE:
+                            parameter = Direction[card_dict['parameter']]
+                        else:  # HARVEST or PLANT
+                            parameter = AssetType[card_dict['parameter']]
+                        card = Card(action_type, parameter)
+                        self.modify_deck(bot, add_card=card)
+                    except (KeyError, ValueError) as e:
+                        raise ValueError(f"Invalid card format: {e}")
 
         elif action_type == ControllerActionType.CREATE_BOT:
             if self.costs['new_bot'] > controller.get_total_resources():
                 raise ValueError("Insufficient resources to create new bot")
-            # Create new bot with default deck at controller's starting position
             new_position = Position(controller.starting_position.x, controller.starting_position.y)
-            new_bot = Bot(new_position, [], controller.id)  # Empty deck for new bot
+            new_bot = Bot(new_position, [], controller.id)
             controller.bots.append(new_bot)
-            self.map[new_position.y][new_position.x].bots.add(new_bot)  # Use add for sets
-            # Deduct cost
+            self.map[new_position.y][new_position.x].bots.add(new_bot)
             controller.deduct_resources(self.costs['new_bot'])
             
-        self.log_event(f"Controller {controller.id} performed {action_type.name}") 
+        self.log_event(f"Controller {controller.id} performed {action_type.name}")
+
+    def advance_time(self, hours: int) -> bool:
+        """Advance the game time by the specified number of hours.
+        Returns False if advancing time would exceed the current day."""
+        if self.hour + hours > self.hours_per_day:
+            return False
+            
+        self.hour += hours
+        if self.hour >= self.hours_per_day:
+            self.hour = 0
+            self.day += 1
+            # Process day-end events like seedling maturation
+            self.mature_seedlings()
+            
+        return True 
