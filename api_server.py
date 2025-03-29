@@ -7,9 +7,18 @@ from typing import List, Dict, Optional, Union
 from game import Game
 from game_interface import GameInterface
 from game_enums import ControllerActionType
+import json
+import logging
+
+# Configure logging
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s [%(levelname)s] %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
+logger = logging.getLogger(__name__)
 
 # Load level configurations
-import json
 LEVEL_CONFIGS = {}
 
 def load_level_configs():
@@ -19,6 +28,7 @@ def load_level_configs():
         'medium_rare': 'medium_rare_config.json'
     }
     for level_name, filename in level_files.items():
+        logger.info(f"Loading level config: {filename}")
         with open(filename, 'r') as f:
             LEVEL_CONFIGS[level_name] = json.load(f)
 
@@ -105,43 +115,62 @@ async def get_game_grid():
 async def process_turn(turn_orders: TurnOrders):
     """Process a game turn with the provided orders"""
     try:
+        logger.debug("Received turn orders:")
+        logger.debug(json.dumps(turn_orders.dict(), indent=2))
+        
         # Convert string action_types to ControllerActionType enum
         orders = []
         for order in turn_orders.orders:
             # Convert action_type string to enum
             try:
                 action_type = ControllerActionType[order.action_type]
+                logger.debug(f"Converting action_type '{order.action_type}' to enum {action_type}")
             except KeyError:
-                raise HTTPException(
-                    status_code=400, 
-                    detail=f"Invalid action_type: {order.action_type}"
-                )
+                error_msg = f"Invalid action_type: {order.action_type}"
+                logger.error(error_msg)
+                raise HTTPException(status_code=400, detail=error_msg)
             
             # Create order dict with enum
-            orders.append({
+            processed_order = {
                 'controller_id': order.controller_id,
                 'action_type': action_type,
                 'parameters': order.parameters
-            })
+            }
+            logger.debug(f"Processed order: {json.dumps(processed_order, indent=2, default=str)}")
+            orders.append(processed_order)
+        
+        logger.debug("Processing turn with orders:")
+        logger.debug(json.dumps(orders, indent=2, default=str))
         
         # Process the turn
         game.process_turn(orders)
         
-        # Return updated game state
+        # Get updated game state
         interface = GameInterface()
         interface.game = game
-        return interface.get_game_state()
+        response_data = interface.get_game_state()
+        
+        logger.debug("Turn processed successfully. Response:")
+        logger.debug(json.dumps(response_data, indent=2, default=str))
+        
+        return response_data
     
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        error_msg = str(e)
+        logger.error(f"ValueError in process_turn: {error_msg}")
+        raise HTTPException(status_code=400, detail=error_msg)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        error_msg = str(e)
+        logger.error(f"Unexpected error in process_turn: {error_msg}")
+        raise HTTPException(status_code=500, detail=error_msg)
 
 @app.get("/")
 async def get_game_client():
     """Serve the game client HTML file"""
+    logger.debug("Serving game client HTML")
     return FileResponse("game_client.html")
 
 if __name__ == "__main__":
     import uvicorn
+    logger.info("Starting SpaceDew Game API server")
     uvicorn.run(app, host="0.0.0.0", port=8000) 

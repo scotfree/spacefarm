@@ -384,6 +384,7 @@ class Game:
 
     def modify_deck(self, bot: Bot, add_card: Optional[Card] = None, remove_index: Optional[int] = None) -> None:
         """Add or remove a card from a bot's deck"""
+        print(f"MODIFYING DECK! {bot}")
         controller = self.controllers[bot.controller_id]
         
         # Check if controller has enough biomass
@@ -396,6 +397,7 @@ class Game:
         if add_card is not None:
             bot.deck.append(add_card)
         if remove_index is not None:
+            print(f"removing: {remove_index}")
             if 0 <= remove_index < len(bot.deck):
                 bot.deck.pop(remove_index)
             else:
@@ -505,6 +507,8 @@ class Game:
             bot_id = parameters.get('bot_id')
             cards = parameters.get('cards')
             remove_index = parameters.get('remove_index')
+            remove_indices = parameters.get('remove_indices')
+            
             if bot_id is None or cards is None:
                 raise ValueError("bot_id and cards parameters required for MODIFY_DECK")
             if bot_id >= len(controller.bots):
@@ -513,13 +517,24 @@ class Game:
                 raise ValueError("Insufficient biomass to modify deck")
             
             bot = controller.bots[bot_id]
-            if remove_index is not None:
-                # Handle card removal
-                self.modify_deck(bot, remove_index=remove_index)
+            
+            # Handle card removal (support both single index and multiple indices)
+            if remove_indices is not None:
+                # Sort indices in reverse order to avoid shifting issues
+                for index in sorted(remove_indices, reverse=True):
+                    if 0 <= index < len(bot.deck):
+                        bot.deck.pop(index)
+                    else:
+                        raise ValueError(f"Invalid deck index: {index}")
+            elif remove_index is not None:
+                # Handle single index removal
+                if 0 <= remove_index < len(bot.deck):
+                    bot.deck.pop(remove_index)
+                else:
+                    raise ValueError(f"Invalid deck index: {remove_index}")
             else:
                 # Handle card addition
                 for card_dict in cards:
-                    # Convert strings to enums
                     try:
                         action_type = ActionType[card_dict['action_type']]
                         if action_type == ActionType.MOVE:

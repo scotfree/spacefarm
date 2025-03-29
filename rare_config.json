@@ -7,13 +7,13 @@
     "modify_deck_cost": 1,
     
     "victory_conditions": {
-        "MINERAL": 10,
-        "BIOMASS": 10,
-        "ENERGY": 10
+        "MINERAL": 0,
+        "BIOMASS": 0,
+        "ENERGY": 20
     },
     
     "initial_state": [
-        {"type": "ORE", "amount": 10, "x": 0, "y": 0},
+        {"type": "COAL", "amount": 10, "x": 0, "y": 0},
         {"type": "COAL", "amount": 2, "x": 1, "y": 1},
         {"type": "COAL", "amount": 5, "x": 2, "y": 2},
         {"type": "PLANT", "amount": 3, "x": 3, "y": 3},

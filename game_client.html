@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SpaceDew Game Client</title>
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Roboto:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/json.min.js"></script>
     <style>
         :root {
             --base-dark: #1a1f2c;
@@ -49,6 +52,7 @@
             border-radius: 8px;
             box-shadow: inset 0 0 20px rgba(0,0,0,0.3);
             position: relative;
+            height: fit-content;
         }
 
         .panel::before {
@@ -68,6 +72,7 @@
         .top-section {
             display: flex;
             gap: 20px;
+            align-items: flex-start;
         }
 
         .left-column {
@@ -76,21 +81,28 @@
             display: flex;
             flex-direction: column;
             gap: 20px;
+            align-self: flex-start;
         }
 
         .right-column {
             flex-grow: 1;
+            align-self: flex-start;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
         }
 
         .scrollable-summary {
             max-height: 300px;
             overflow-y: auto;
-            padding: 15px;
+            padding: 10px;
             border: 1px solid var(--neon-green-dim);
-            border-radius: 4px;
+            border-radius: 8px;
             background: var(--base-dark);
             font-family: 'Share Tech Mono', monospace;
             box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+            margin: 0;
+            line-height: 1.4;
         }
 
         .scrollable-summary::-webkit-scrollbar {
@@ -108,6 +120,19 @@
             border: 2px solid var(--base-dark);
         }
 
+        .scrollable-summary br:first-child {
+            display: none;
+        }
+
+        .scrollable-summary > *:first-child {
+            margin-top: 0;
+            padding-top: 0;
+        }
+
+        .panel h2 {
+            margin: 0 0 15px 0;
+        }
+
         .controls {
             display: flex;
             flex-direction: column;
@@ -116,6 +141,20 @@
 
         .form-group {
             margin-bottom: 15px;
+        }
+
+        .form-group.horizontal {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+        
+        .form-group.horizontal > div {
+            flex: 1;
+        }
+
+        .form-group.horizontal label {
+            margin-bottom: 8px;
         }
 
         label {
@@ -304,7 +343,7 @@
         .toggle-button {
             background-color: var(--base-dark);
             color: var(--neon-green);
-            padding: 12px 20px;
+            padding: 8px 16px;
             border: 2px solid var(--neon-green-dim);
             border-radius: 4px;
             cursor: pointer;
@@ -312,6 +351,7 @@
             text-transform: uppercase;
             letter-spacing: 1px;
             transition: all 0.3s ease;
+            font-size: 14px;
         }
         .toggle-button.active {
             background-color: var(--neon-green);
@@ -327,6 +367,101 @@
             border-radius: 4px;
             font-family: 'Share Tech Mono', monospace;
             color: var(--text-color);
+            margin-top: 10px;
+        }
+
+        .secondary-button {
+            background-color: var(--base-dark);
+            color: var(--neon-green);
+            padding: 8px 16px;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .card-list {
+            background: var(--base-dark);
+            border: 1px solid var(--base-light);
+            border-radius: 4px;
+            padding: 10px;
+            margin-top: 10px;
+            min-height: 50px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .card-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px;
+            border-bottom: 1px solid var(--base-light);
+        }
+
+        .card-list-item:last-child {
+            border-bottom: none;
+        }
+
+        .remove-card {
+            color: #ff4444;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-family: 'Share Tech Mono', monospace;
+            padding: 2px 6px;
+        }
+
+        .remove-card:hover {
+            background-color: rgba(255, 68, 68, 0.2);
+        }
+
+        select[multiple] {
+            height: auto;
+            min-height: 120px;
+        }
+
+        .level-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+
+        .level-controls select {
+            flex-grow: 1;
+        }
+
+        .level-controls .restart-button {
+            margin: 0;
+            white-space: nowrap;
+        }
+
+        .level-select-group {
+            margin-top: 20px;
+            border-top: 1px solid var(--base-light);
+            padding-top: 20px;
+        }
+
+        #rawState {
+            padding: 0 !important;
+            background: transparent !important;
+            border: none !important;
+        }
+
+        #rawState pre {
+            margin: 0;
+            border-radius: 8px;
+            background: var(--base-dark) !important;
+        }
+
+        #rawState code {
+            font-family: 'Share Tech Mono', monospace !important;
+            font-size: 14px !important;
+            line-height: 1.4 !important;
+        }
+
+        .hljs {
+            background: var(--base-dark) !important;
+            padding: 15px !important;
         }
     </style>
 </head>
@@ -336,21 +471,19 @@
         
         <div class="top-section">
             <div class="left-column">
-                <div id="error" class="error"></div>
+                
                 <div class="panel">
-                    <h2>Game Status</h2>
+                    <h2 id="gameStatusTitle">Game Status</h2>
                     
                     <div id="gameStatus" class="scrollable-summary">
                         <!-- Game status will be inserted here -->
                     </div>
                 </div>
 
+                
                 <div class="panel controls">
                     <h2>Controls</h2>
-                    <div class="form-group">
-                        <label for="controllerId">Controller ID:</label>
-                        <input type="number" id="controllerId" value="0" min="0">
-                    </div>
+                   
                     <div class="form-group">
                         <label for="actionType">Action Type:</label>
                         <select id="actionType">
@@ -364,10 +497,28 @@
                     </div>
                     <button onclick="submitTurn()">Submit Action</button>
                     
+                    <div class="panel">
+                        <h2 id="levelTitle">Level</h2>
+                        
+                        <div class="form-group">
+                            <label>Goals:</label>
+                            <div id="gameConfig" class="scrollable-summary">
+                                <!-- Victory conditions will be inserted here -->
+                            </div>
+                        </div>
+
+                        <div class="form-group level-select-group">
+                            <label for="levelSelect">Change Level:</label>
+                            <div class="level-controls">
+                                <select id="levelSelect"></select>
+                                <button onclick="restartGame()" class="restart-button">Restart Level</button>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="form-group">
-                        <label for="levelSelect">Level:</label>
-                        <select id="levelSelect"></select>
-                        <button onclick="restartGame()" class="restart-button">Restart Level</button>
+                        <label for="controllerId">Controller ID:</label>
+                        <input type="number" id="controllerId" value="0" min="0">
                     </div>
                 </div>
             </div>
@@ -379,16 +530,18 @@
                         <!-- Game grid will be inserted here -->
                     </div>
                 </div>
+                
+                <div class="panel">
+                    <div class="toggle-container">
+                        <button class="toggle-button active" onclick="toggleView('eventLog')">Event Log</button>
+                        <button class="toggle-button" onclick="toggleView('rawState')">Raw State</button>
+                    </div>
+                    <div id="eventLog"><!-- Event log will be inserted here --></div>
+                    <div id="rawState" style="display: none;"><!-- Raw state will be inserted here --></div>
+                </div>
+                
+                <div id="error" class="error"></div>
             </div>
-        </div>
-
-        <div class="bottom-section">
-            <div class="toggle-container">
-                <button class="toggle-button active" onclick="toggleView('eventLog')">Event Log</button>
-                <button class="toggle-button" onclick="toggleView('rawState')">Raw State</button>
-            </div>
-            <div id="eventLog"><!-- Event log will be inserted here --></div>
-            <div id="rawState" style="display: none;"><!-- Raw state will be inserted here --></div>
         </div>
     </div>
 
@@ -412,16 +565,18 @@
                 </div>
             `,
             'MODIFY_DECK': `
-                <div class="form-group">
-                    <label>Bot ID (1 hour):</label>
-                    <input type="number" id="botId" min="0" value="0">
-                </div>
-                <div class="form-group">
-                    <label>Modification Type:</label><br>
-                    <input type="radio" name="modType" value="add" id="addCard" checked>
-                    <label for="addCard">Add Card</label>
-                    <input type="radio" name="modType" value="remove" id="removeCard">
-                    <label for="removeCard">Remove Card</label>
+                <div class="form-group horizontal">
+                    <div>
+                        <label>Bot ID (1 hour):</label>
+                        <input type="number" id="botId" min="0" value="0">
+                    </div>
+                    <div>
+                        <label>Modification Type:</label>
+                        <input type="radio" name="modType" value="add" id="addCard" checked>
+                        <label for="addCard" style="display: inline;">Add Card</label>
+                        <input type="radio" name="modType" value="remove" id="removeCard">
+                        <label for="removeCard" style="display: inline;">Remove Card</label>
+                    </div>
                 </div>
                 <div id="addCardInputs">
                     <div class="form-group">
@@ -450,11 +605,16 @@
                             <option value="COAL">Coal</option>
                         </select>
                     </div>
+                    <button type="button" onclick="addCardToList()" class="secondary-button">Add Card to List</button>
+                    <div class="selected-cards-list">
+                        <label>Selected Cards:</label>
+                        <div id="selectedCardsList" class="card-list"></div>
+                    </div>
                 </div>
                 <div id="removeCardInputs" style="display: none;">
                     <div class="form-group">
-                        <label>Card to Remove:</label>
-                        <select id="cardToRemove"></select>
+                        <label>Cards to Remove (hold Ctrl/Cmd to select multiple):</label>
+                        <select id="cardToRemove" multiple size="5"></select>
                     </div>
                 </div>
             `,
@@ -501,6 +661,39 @@
             ).join('');
         }
 
+        // Store selected cards for adding
+        let selectedCardsToAdd = [];
+
+        function addCardToList() {
+            const actionType = document.getElementById('cardActionType').value;
+            const parameter = actionType === 'MOVE' 
+                ? document.getElementById('direction').value
+                : document.getElementById('assetType').value;
+            
+            const card = {
+                action_type: actionType,
+                parameter: parameter
+            };
+            
+            selectedCardsToAdd.push(card);
+            updateSelectedCardsList();
+        }
+
+        function removeCardFromList(index) {
+            selectedCardsToAdd.splice(index, 1);
+            updateSelectedCardsList();
+        }
+
+        function updateSelectedCardsList() {
+            const listElement = document.getElementById('selectedCardsList');
+            listElement.innerHTML = selectedCardsToAdd.map((card, index) => `
+                <div class="card-list-item">
+                    <span>${formatCard(card)}</span>
+                    <button class="remove-card" onclick="removeCardFromList(${index})">×</button>
+                </div>
+            `).join('');
+        }
+
         // Update parameters form based on selected action type
         document.getElementById('actionType').addEventListener('change', function() {
             const container = document.getElementById('actionParameters');
@@ -529,6 +722,8 @@
                 addInputs.style.display = 'block';
                 removeInputs.style.display = 'none';
                 updateCardParameters();
+                selectedCardsToAdd = []; // Reset selected cards when switching modes
+                updateSelectedCardsList();
             } else {
                 addInputs.style.display = 'none';
                 removeInputs.style.display = 'block';
@@ -553,37 +748,48 @@
         function generateGameStatus(gameState) {
             let status = [];
             
-            // Add day and hour
-            status.push(`Day ${gameState.day}, Hour ${gameState.hour}`);
-            
             // Add controller information
             for (const controller of gameState.controllers) {
-                status.push(`<br><br>Controller ${controller.id}:`);
-                status.push(`<br>Bots: ${controller.bots.length}`);
+                // Add resources on a single line with abbreviations
+                const resources = Object.entries(controller.resources)
+                    .map(([resource, amount]) => `${resource.substring(0, 3)}: ${amount}`)
+                    .join(' | ');
+                status.push(`${resources}`);
                 
-                // Add deck information for each bot
-                controller.bots.forEach((bot, i) => {
-                    const deckStr = bot.deck.map(card => {
+                // Add deck information for each bot vertically
+                controller.bots.forEach((bot, botIndex) => {
+                    status.push(`<br><br>Bot ${botIndex} deck:`);
+                    bot.deck.forEach((card, cardIndex) => {
+                        let cardDisplay = '';
                         if (card.action_type === 'MOVE') {
-                            return card.parameter === 'RANDOM' ? 'M?' : `M${card.parameter[0]}`;
+                            cardDisplay = `Move ${card.parameter === 'RANDOM' ? 'Random' : card.parameter.toLowerCase()}`;
                         } else if (card.action_type === 'HARVEST') {
-                            return `H${card.parameter[0]}`;
+                            cardDisplay = `Harvest ${card.parameter.toLowerCase()}`;
                         } else if (card.action_type === 'PLANT') {
-                            return `P${card.parameter[0]}`;
+                            cardDisplay = `Plant ${card.parameter.toLowerCase()}`;
                         }
-                    }).join(' ');
-                    status.push(`<br>Bot ${i} deck: [${deckStr}]`);
+                        
+                        // Add brackets around the next card to execute
+                        if (cardIndex === 0) {
+                            cardDisplay = `[${cardDisplay}]`;
+                        }
+                        
+                        status.push(`<br> - ${cardDisplay}`);
+                    });
                 });
-                
-                // Add resources
-                status.push('<br>Resources:');
-                for (const [resource, amount] of Object.entries(controller.resources)) {
-                    status.push(`<br> - ${resource}: ${amount}`);
-                }
             }
             
+            return status.join('');
+        }
+
+        function generateGameTime(gameState) {
+            return `Day ${gameState.day} Hour ${gameState.hour}`;
+        }
+
+        function generateGameConfig(gameState) {
+            let status = [];
+            
             // Add victory conditions
-            status.push('<br><br>Victory Conditions:');
             for (const [resource, amount] of Object.entries(gameState.victory_conditions)) {
                 status.push(`<br> - ${resource}: ${amount}`);
             }
@@ -640,9 +846,15 @@
                 
                 // Update the displays
                 renderGameGrid(data);
+                document.getElementById('gameStatusTitle').innerHTML = generateGameTime(data);
                 document.getElementById('gameStatus').innerHTML = generateGameStatus(data);
+                document.getElementById('gameConfig').innerHTML = generateGameConfig(data);
                 document.getElementById('eventLog').innerHTML = generateEventLog(data);
-                document.getElementById('rawState').textContent = JSON.stringify(data, null, 2);
+                
+                // Update raw state with syntax highlighting
+                const formattedJson = JSON.stringify(data, null, 2);
+                document.getElementById('rawState').innerHTML = `<pre><code class="language-json">${formattedJson}</code></pre>`;
+                hljs.highlightElement(document.querySelector('#rawState code'));
                 
                 // Update card list if we're in remove mode
                 if (document.getElementById('actionType').value === 'MODIFY_DECK' &&
@@ -661,75 +873,119 @@
             
             let parameters = {};
             let hourCost = 0;
+            let selectedIndices = [];  // Declare selectedIndices at the function scope level
+            let orders = [];  // Declare orders at the function scope level
             
             if (actionType === 'TAKE_BOT_ACTIONS') {
                 const energyPoints = parseInt(document.getElementById('energyPoints').value);
                 parameters = { energy_points: energyPoints };
                 hourCost = energyPoints; // 1 hour per energy point
+                orders = [{
+                    controller_id: controllerId,
+                    action_type: actionType,
+                    parameters: parameters
+                }];
             }
             else if (actionType === 'MODIFY_DECK') {
                 const botId = parseInt(document.getElementById('botId').value);
                 const modType = document.querySelector('input[name="modType"]:checked').value;
                 hourCost = 1; // 1 hour for deck modification
                 
-                parameters = {
-                    bot_id: botId
-                };
-
                 if (modType === 'add') {
-                    const actionType = document.getElementById('cardActionType').value;
-                    const parameter = actionType === 'MOVE' 
-                        ? document.getElementById('direction').value
-                        : document.getElementById('assetType').value;
-                    parameters.cards = [{
-                        action_type: actionType,
-                        parameter: parameter
-                    }];
+                    if (selectedCardsToAdd.length === 0) {
+                        document.getElementById('error').textContent = 'Please add at least one card to the list';
+                        return;
+                    }
+                    parameters = {
+                        bot_id: botId,
+                        cards: selectedCardsToAdd
+                    };
                 } else {
-                    parameters.cards = [];
-                    parameters.remove_index = parseInt(document.getElementById('cardToRemove').value);
+                    selectedIndices = Array.from(document.getElementById('cardToRemove').selectedOptions)
+                        .map(option => parseInt(option.value));
+                    if (selectedIndices.length === 0) {
+                        document.getElementById('error').textContent = 'Please select at least one card to remove';
+                        return;
+                    }
+                    parameters = {
+                        bot_id: botId,
+                        cards: [],
+                        remove_indices: selectedIndices
+                    };
                 }
+                orders = [{
+                    controller_id: controllerId,
+                    action_type: actionType,
+                    parameters: parameters
+                }];
             }
             else if (actionType === 'CREATE_BOT') {
                 hourCost = 6; // 6 hours for new bot
+                orders = [{
+                    controller_id: controllerId,
+                    action_type: actionType,
+                    parameters: {}
+                }];
             }
 
             // Check if we have enough hours
+            const totalHourCost = hourCost;  // Always just the base cost now
+                
             if (currentGameState && 
-                currentGameState.hour + hourCost > currentGameState.hours_per_day) {
+                currentGameState.hour + totalHourCost > currentGameState.hours_per_day) {
                 document.getElementById('error').textContent = 
-                    `Not enough hours left in the day (need ${hourCost}, have ${currentGameState.hours_per_day - currentGameState.hour})`;
+                    `Not enough hours left in the day (need ${totalHourCost}, have ${currentGameState.hours_per_day - currentGameState.hour})`;
                 return;
             }
 
             try {
+                const requestBody = { orders };
+                
+                // Enhanced request logging
+                console.log('Sending request:', JSON.stringify(requestBody, null, 2));
+                if (actionType === 'MODIFY_DECK' && parameters.remove_indices) {
+                    console.log('Selected indices for removal:', selectedIndices);
+                    console.log('Current bot deck before modification:', 
+                        currentGameState.controllers[controllerId].bots[parameters.bot_id].deck);
+                }
+                
                 const response = await fetch('/game/turn', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({
-                        orders: [{
-                            controller_id: controllerId,
-                            action_type: actionType,
-                            parameters: parameters
-                        }]
-                    })
+                    body: JSON.stringify(requestBody)
                 });
 
+                // Enhanced response logging
+                let responseData;
+                const contentType = response.headers.get("content-type");
+                if (contentType && contentType.includes("application/json")) {
+                    responseData = await response.json();
+                    console.log('Response (JSON):', responseData);
+                    if (actionType === 'MODIFY_DECK') {
+                        console.log('Bot deck after modification attempt:', 
+                            responseData.controllers[controllerId].bots[parameters.bot_id].deck);
+                    }
+                } else {
+                    responseData = await response.text();
+                    console.log('Response (text):', responseData);
+                }
+
                 if (!response.ok) {
-                    const error = await response.text();
-                    document.getElementById('error').textContent = error;
+                    document.getElementById('error').textContent = typeof responseData === 'string' ? responseData : JSON.stringify(responseData);
                     return;
                 }
 
                 // Clear error message if successful
                 document.getElementById('error').textContent = '';
+                console.log('Action completed successfully, refreshing game state...');
                 
                 // Refresh game state
                 await getGameState();
                 
             } catch (error) {
+                console.error('Error in submitTurn:', error);
                 document.getElementById('error').textContent = error.message;
             }
         }
@@ -750,6 +1006,9 @@
                 levelSelect.innerHTML = data.levels.map(level => 
                     `<option value="${level}" ${level === data.current_level ? 'selected' : ''}>${level}</option>`
                 ).join('');
+
+                // Update the level title
+                document.getElementById('levelTitle').textContent = data.current_level;
             } catch (error) {
                 console.error('Error loading levels:', error);
                 document.getElementById('error').textContent = 'Error loading levels: ' + error.message;
@@ -783,6 +1042,9 @@
                 document.getElementById('gameStatus').innerHTML = generateGameStatus(data);
                 document.getElementById('eventLog').innerHTML = generateEventLog(data);
                 document.getElementById('rawState').textContent = JSON.stringify(data, null, 2);
+                
+                // Update the level title
+                document.getElementById('levelTitle').textContent = level;
                 
             } catch (error) {
                 console.error('Error restarting game:', error);

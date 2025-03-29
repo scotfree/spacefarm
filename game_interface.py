@@ -133,6 +133,10 @@ class GameInterface:
             #summary.append(f"<br>Controller {controller.id}:")
             #summary.append(f"<br>Bots: {len(controller.bots)}")
             
+            summary.append(f"<br>Controller {controller.id}:")
+            summary.append(f"<br>Bots: {len(controller.bots)}")
+
+
             # Add deck information for each bot
             for i, bot in enumerate(controller.bots):
                 summary.append(f"<br>Bot {i} deck: [")
@@ -150,14 +154,11 @@ class GameInterface:
                     card_labels.append(label)
                 summary.append(" ".join(card_labels) + "]")
             
-            summary.append("<br>Resources:")
-            for resource_type, amount in controller.resources.items():
-                summary.append(f"<br> - {resource_type.name}: {amount}")
-        
+           
         # Add victory conditions
-        summary.append("<br><br>Victory Conditions:")
-        for resource_type, amount in game.victory_conditions.items():
-            summary.append(f"<br> - {resource_type.name}: {amount}")
+        # summary.append("<br><br>Victory Conditions:")
+        # for resource_type, amount in game.victory_conditions.items():
+        #     summary.append(f"<br> - {resource_type.name}: {amount}")
         
         summary.append("</div>")
         return '\n'.join(summary)
