@@ -463,6 +463,79 @@
             background: var(--base-dark) !important;
             padding: 15px !important;
         }
+
+        .control-tabs {
+            display: flex;
+            gap: 2px;
+            margin-bottom: 20px;
+            padding: 4px;
+            background: #2a2a2a;
+            border-radius: 4px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 12px;
+            font-family: 'VT323', monospace;
+            font-size: 1.2em;
+            text-align: center;
+            color: #c0c0c0;
+            background: linear-gradient(145deg, #3a3a3a 0%, #2a2a2a 100%);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            box-shadow: 
+                0 1px 2px rgba(0,0,0,0.2),
+                inset 0 1px 1px rgba(255,255,255,0.1);
+        }
+
+        .tab-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, 
+                rgba(139, 69, 19, 0.05),
+                rgba(139, 69, 19, 0.1)
+            );
+            border-radius: 4px;
+            pointer-events: none;
+        }
+
+        .tab-button:hover {
+            background: linear-gradient(145deg, #404040 0%, #303030 100%);
+            transform: translateY(-1px);
+        }
+
+        .tab-button.active {
+            background: linear-gradient(145deg, #ff6b4a 0%, #cc4f35 100%);
+            color: #1a1a1a;
+            box-shadow: 
+                0 2px 4px rgba(0,0,0,0.3),
+                inset 0 1px 1px rgba(255,255,255,0.2);
+            transform: translateY(1px);
+        }
+
+        .tab-button.active::before {
+            background: linear-gradient(45deg,
+                rgba(255, 255, 255, 0.1),
+                rgba(255, 255, 255, 0.05)
+            );
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -484,19 +557,85 @@
                 <div class="panel controls">
                     <h2>Controls</h2>
                    
-                    <div class="form-group">
-                        <label for="actionType">Action Type:</label>
-                        <select id="actionType">
-                            <option value="TAKE_BOT_ACTIONS">Take Bot Actions</option>
-                            <option value="MODIFY_DECK">Modify Deck</option>
-                            <option value="CREATE_BOT">Create Bot</option>
-                        </select>
+                    <div class="game-controls">
+                        <div class="control-tabs">
+                            <button class="tab-button active" data-tab="bot-actions">RUN</button>
+                            <button class="tab-button" data-tab="edit-deck">EDIT</button>
+                            <button class="tab-button" data-tab="create-bot">NEW</button>
+                        </div>
+
+                        <div id="bot-actions" class="tab-content active">
+                            <div class="control-group">
+                                <label for="energy-points">Energy Points:</label>
+                                <input type="number" id="energy-points" min="1" value="1">
+                            </div>
+                        </div>
+
+                        <div id="edit-deck" class="tab-content">
+                            <div class="control-group">
+                                <label for="bot-id">Bot ID:</label>
+                                <input type="number" id="bot-id" min="0" value="0">
+                            </div>
+                            <div class="control-group">
+                                <label>Modification Type:</label>
+                                <div class="radio-group">
+                                    <input type="radio" id="add-card" name="modification-type" value="add" checked>
+                                    <label for="add-card">Add Card</label>
+                                    <input type="radio" id="remove-card" name="modification-type" value="remove">
+                                    <label for="remove-card">Remove Card</label>
+                                </div>
+                            </div>
+                            <div id="add-card-controls">
+                                <div class="control-group">
+                                    <label>Action Type:</label>
+                                    <select id="cardActionType">
+                                        <option value="MOVE">Move</option>
+                                        <option value="HARVEST">Harvest</option>
+                                        <option value="PLANT">Plant</option>
+                                    </select>
+                                </div>
+                                <div class="control-group" id="moveParameters">
+                                    <label>Direction:</label>
+                                    <select id="direction">
+                                        <option value="NORTH">North</option>
+                                        <option value="SOUTH">South</option>
+                                        <option value="EAST">East</option>
+                                        <option value="WEST">West</option>
+                                        <option value="RANDOM">Random</option>
+                                    </select>
+                                </div>
+                                <div class="control-group" id="assetParameters" style="display: none;">
+                                    <label>Asset Type:</label>
+                                    <select id="assetType">
+                                        <option value="ORE">Ore</option>
+                                        <option value="PLANT">Plant</option>
+                                        <option value="COAL">Coal</option>
+                                    </select>
+                                </div>
+                                <button type="button" onclick="addCardToList()" class="secondary-button">Add Card to List</button>
+                                <div class="selected-cards-list">
+                                    <label>Selected Cards:</label>
+                                    <div id="selectedCardsList" class="card-list"></div>
+                                </div>
+                            </div>
+                            <div id="remove-card-controls" style="display: none;">
+                                <div class="control-group">
+                                    <label>Cards to Remove (hold Ctrl/Cmd to select multiple):</label>
+                                    <select id="cardToRemove" multiple size="5"></select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="create-bot" class="tab-content">
+                            <p>Creates a new bot at your starting position.</p>
+                            <p>Cost: 100 minerals</p>
+                        </div>
+
+                        <div class="control-group">
+                            <button id="submit-action" class="action-button">Submit Action</button>
+                        </div>
                     </div>
-                    <div id="actionParameters">
-                        <!-- Action parameters will be inserted here -->
-                    </div>
-                    <button onclick="submitTurn()">Submit Action</button>
-                    
+
                     <div class="panel">
                         <h2 id="levelTitle">Level</h2>
                         
@@ -646,7 +785,7 @@
         function updateCardList() {
             if (!currentGameState) return;
             
-            const botId = parseInt(document.getElementById('botId').value);
+            const botId = parseInt(document.getElementById('bot-id').value);
             const controller = currentGameState.controllers[0]; // Assuming we're working with the first controller
             const select = document.getElementById('cardToRemove');
             
@@ -695,22 +834,16 @@
         }
 
         // Update parameters form based on selected action type
-        document.getElementById('actionType').addEventListener('change', function() {
-            const container = document.getElementById('actionParameters');
-            container.innerHTML = actionParameters[this.value];
-            
-            if (this.value === 'MODIFY_DECK') {
-                document.querySelectorAll('input[name="modType"]').forEach(radio => {
-                    radio.addEventListener('change', updateModificationInputs);
-                });
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', () => {
+                // Update button states
+                document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+                button.classList.add('active');
                 
-                const cardActionType = document.getElementById('cardActionType');
-                if (cardActionType) {
-                    cardActionType.addEventListener('change', updateCardParameters);
-                }
-                
-                updateModificationInputs();
-            }
+                // Update content visibility
+                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                document.getElementById(button.dataset.tab).classList.add('active');
+            });
         });
 
         function updateModificationInputs() {
@@ -828,8 +961,12 @@
         }
 
         // Initialize with default action type parameters
-        document.getElementById('actionParameters').innerHTML = 
-            actionParameters[document.getElementById('actionType').value];
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', () => {
+                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                document.getElementById(button.dataset.tab).classList.add('active');
+            });
+        });
 
         async function getGameState() {
             try {
@@ -857,8 +994,7 @@
                 hljs.highlightElement(document.querySelector('#rawState code'));
                 
                 // Update card list if we're in remove mode
-                if (document.getElementById('actionType').value === 'MODIFY_DECK' &&
-                    document.querySelector('input[name="modType"]:checked')?.value === 'remove') {
+                if (document.querySelector('input[name="modType"]:checked')?.value === 'remove') {
                     updateCardList();
                 }
             } catch (error) {
@@ -868,27 +1004,35 @@
         }
 
         async function submitTurn() {
-            const actionType = document.getElementById('actionType').value;
+            const selectedTab = document.querySelector('.tab-button.active').dataset.tab;
+            let actionType;
+            
+            switch(selectedTab) {
+                case 'bot-actions':
+                    actionType = 'TAKE_BOT_ACTIONS';
+                    break;
+                case 'edit-deck':
+                    actionType = 'MODIFY_DECK';
+                    break;
+                case 'create-bot':
+                    actionType = 'CREATE_BOT';
+                    break;
+            }
+            
             const controllerId = parseInt(document.getElementById('controllerId').value);
             
             let parameters = {};
             let hourCost = 0;
-            let selectedIndices = [];  // Declare selectedIndices at the function scope level
-            let orders = [];  // Declare orders at the function scope level
+            let orders = [];
             
             if (actionType === 'TAKE_BOT_ACTIONS') {
-                const energyPoints = parseInt(document.getElementById('energyPoints').value);
+                const energyPoints = parseInt(document.getElementById('energy-points').value);
                 parameters = { energy_points: energyPoints };
                 hourCost = energyPoints; // 1 hour per energy point
-                orders = [{
-                    controller_id: controllerId,
-                    action_type: actionType,
-                    parameters: parameters
-                }];
             }
             else if (actionType === 'MODIFY_DECK') {
-                const botId = parseInt(document.getElementById('botId').value);
-                const modType = document.querySelector('input[name="modType"]:checked').value;
+                const botId = parseInt(document.getElementById('bot-id').value);
+                const modType = document.querySelector('input[name="modification-type"]:checked').value;
                 hourCost = 1; // 1 hour for deck modification
                 
                 if (modType === 'add') {
@@ -901,7 +1045,7 @@
                         cards: selectedCardsToAdd
                     };
                 } else {
-                    selectedIndices = Array.from(document.getElementById('cardToRemove').selectedOptions)
+                    const selectedIndices = Array.from(document.getElementById('cardToRemove').selectedOptions)
                         .map(option => parseInt(option.value));
                     if (selectedIndices.length === 0) {
                         document.getElementById('error').textContent = 'Please select at least one card to remove';
@@ -913,23 +1057,20 @@
                         remove_indices: selectedIndices
                     };
                 }
-                orders = [{
-                    controller_id: controllerId,
-                    action_type: actionType,
-                    parameters: parameters
-                }];
             }
             else if (actionType === 'CREATE_BOT') {
                 hourCost = 6; // 6 hours for new bot
-                orders = [{
-                    controller_id: controllerId,
-                    action_type: actionType,
-                    parameters: {}
-                }];
+                parameters = {};
             }
 
+            orders = [{
+                controller_id: controllerId,
+                action_type: actionType,
+                parameters: parameters
+            }];
+
             // Check if we have enough hours
-            const totalHourCost = hourCost;  // Always just the base cost now
+            const totalHourCost = hourCost;
                 
             if (currentGameState && 
                 currentGameState.hour + totalHourCost > currentGameState.hours_per_day) {
@@ -943,8 +1084,7 @@
                 
                 // Enhanced request logging
                 console.log('Sending request:', JSON.stringify(requestBody, null, 2));
-                if (actionType === 'MODIFY_DECK' && parameters.remove_indices) {
-                    console.log('Selected indices for removal:', selectedIndices);
+                if (actionType === 'MODIFY_DECK') {
                     console.log('Current bot deck before modification:', 
                         currentGameState.controllers[controllerId].bots[parameters.bot_id].deck);
                 }
@@ -977,9 +1117,12 @@
                     return;
                 }
 
-                // Clear error message if successful
+                // Clear error message and selected cards if successful
                 document.getElementById('error').textContent = '';
-                console.log('Action completed successfully, refreshing game state...');
+                if (actionType === 'MODIFY_DECK') {
+                    selectedCardsToAdd = [];
+                    updateSelectedCardsList();
+                }
                 
                 // Refresh game state
                 await getGameState();
@@ -1117,6 +1260,39 @@
         // Initialize game state and levels
         loadLevels();
         getGameState();
+
+        // Add event listeners for the modification type radio buttons
+        document.querySelectorAll('input[name="modification-type"]').forEach(radio => {
+            radio.addEventListener('change', () => {
+                const addControls = document.getElementById('add-card-controls');
+                const removeControls = document.getElementById('remove-card-controls');
+                if (radio.value === 'add') {
+                    addControls.style.display = 'block';
+                    removeControls.style.display = 'none';
+                    updateCardParameters();
+                } else {
+                    addControls.style.display = 'none';
+                    removeControls.style.display = 'block';
+                    updateCardList();
+                }
+            });
+        });
+
+        // Add event listener for bot ID changes
+        document.getElementById('bot-id').addEventListener('change', () => {
+            if (document.querySelector('input[name="modification-type"]:checked').value === 'remove') {
+                updateCardList();
+            }
+        });
+
+        // Add event listener for card action type changes
+        document.getElementById('cardActionType').addEventListener('change', updateCardParameters);
+
+        // Add event listener for submit action button
+        document.getElementById('submit-action').addEventListener('click', submitTurn);
+
+        // Initial update of card parameters
+        updateCardParameters();
     </script>
 </body>
 </html> 

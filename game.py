@@ -389,7 +389,7 @@ class Game:
         
         # Check if controller has enough biomass
         if controller.resources[ResourceType.BIOMASS] < self.costs['modify_deck']:
-            raise ValueError("Not enough biomass to modify deck")
+            self.log_event("Not enough biomass to modify deck")
         
         # Deduct cost from controller's resources
         controller.resources[ResourceType.BIOMASS] -= self.costs['modify_deck']
