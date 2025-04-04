@@ -116,7 +116,7 @@ async def process_turn(turn_orders: TurnOrders):
     """Process a game turn with the provided orders"""
     try:
         logger.debug("Received turn orders:")
-        logger.debug(json.dumps(turn_orders.dict(), indent=2))
+        # logger.debug(json.dumps(turn_orders.dict(), indent=2))
         
         # Convert string action_types to ControllerActionType enum
         orders = []
@@ -139,8 +139,8 @@ async def process_turn(turn_orders: TurnOrders):
             logger.debug(f"Processed order: {json.dumps(processed_order, indent=2, default=str)}")
             orders.append(processed_order)
         
-        logger.debug("Processing turn with orders:")
-        logger.debug(json.dumps(orders, indent=2, default=str))
+        #logger.debug("Processing turn with orders:")
+        #logger.debug(json.dumps(orders, indent=2, default=str))
         
         # Process the turn
         game.process_turn(orders)
@@ -169,6 +169,11 @@ async def get_game_client():
     """Serve the game client HTML file"""
     logger.debug("Serving game client HTML")
     return FileResponse("game_client.html")
+
+@app.get("/favicon.svg")
+async def get_favicon():
+    """Serve the favicon file"""
+    return FileResponse("favicon.svg")
 
 if __name__ == "__main__":
     import uvicorn

@@ -5,6 +5,29 @@ from game_enums import (
     Direction, ActionType, AssetType, ResourceType, ControllerActionType,
     DIRECTION_VECTORS, ASSET_TO_RESOURCE, SEEDLING_TO_ASSET
 )
+MAIN_HELP = """
+Your space ship, the "Stardew Valley", has crashed!
+You are able to stay alive inside the wreck mostly by sleeping in your suspended animation pod to reduce resource usage.
+To gather enough resources to survice and eventually repair your ship, you;ll need to gather and grow from the outside world which you cannot visit.
+Luckily, you have built a Bot which can take your orders in the outside world and perform your tasks.
+You will need to give it its orders then return to sleep while it performs them.
+The longer you can let it run while you sleep the more efficient your operation will be, but the harder it will be adapt to any changes or challenges to the assuptions underlying your orders.
+
+Your primary control is how to spend the hours of your days. While you sleep your bots will perform your given tasks. Reprogramming the bots or building new ones will require you to be awake, which consumes your precious biomass.
+
+Biomass: perforrm waking tasks
+Energy: perform bot actions and tasks
+Metal: build new machinery and components
+
+Controls:
+RUN: let N hours pass, consuming no biomass while bots work
+EDIT: reconfigure your bots, cosuming biomass
+NEW: Create new bot out of metal
+
+Each scenatior will have a set of goals to be accomplished - generally needed amounts of resources.
+
+"""
+
 
 class Game:
     def __init__(self, config: dict):
@@ -145,7 +168,7 @@ class Game:
         self.mature_seedlings()
         
         # Increment hour counter
-        self.hour += 1
+        # self.hour += 1
         
         # Check if day is complete
         if self.hour >= self.hours_per_day:
@@ -433,12 +456,15 @@ class Game:
     def check_victory(self) -> Optional[Controller]:
         """Check if any controller has met the victory conditions"""
         for controller in self.controllers:
+            print(f"checking victory for Controller {controller.id}")
             victory = True
             for resource_type, amount in self.victory_conditions.items():
                 if controller.resources[resource_type] < amount:
                     victory = False
+                    print(f"...failed to meet victory condition for {resource_type.name}...")
                     break
             if victory:
+                print(f"...victory condition met for {controller}...")
                 return controller
         return None
 
@@ -494,23 +520,24 @@ class Game:
             hour_cost = self.hour_costs['new_bot']
 
         # Check if we have enough hours left in the day
+        print(f"About to advance time, hour cost: {hour_cost}...")
         if not self.advance_time(hour_cost):
             raise ValueError(f"Not enough hours left in the day for {action_type.name}")
-
+        print(f"...advanced time, hour cost: {self.hour}...")
         # Process the action
         if action_type == ControllerActionType.TAKE_BOT_ACTIONS:
             if energy_points > controller.get_total_resources():
                 raise ValueError(f"Insufficient resources for {energy_points} energy points")
             self.process_bot_actions(controller, energy_points)
 
+
         elif action_type == ControllerActionType.MODIFY_DECK:
             bot_id = parameters.get('bot_id')
             cards = parameters.get('cards')
-            remove_index = parameters.get('remove_index')
-            remove_indices = parameters.get('remove_indices')
+            removed_ids = parameters.get('removed_ids')
             
-            if bot_id is None or cards is None:
-                raise ValueError("bot_id and cards parameters required for MODIFY_DECK")
+            if bot_id is None:
+                raise ValueError("bot_id parameter required for MODIFY_DECK")
             if bot_id >= len(controller.bots):
                 raise ValueError(f"Invalid bot_id: {bot_id}")
             if self.costs['modify_deck'] > controller.resources[ResourceType.BIOMASS]:
@@ -518,22 +545,16 @@ class Game:
             
             bot = controller.bots[bot_id]
             
-            # Handle card removal (support both single index and multiple indices)
-            if remove_indices is not None:
+            # Handle card removal
+            if removed_ids is not None:
                 # Sort indices in reverse order to avoid shifting issues
-                for index in sorted(remove_indices, reverse=True):
+                for index in sorted(removed_ids, reverse=True):
                     if 0 <= index < len(bot.deck):
                         bot.deck.pop(index)
                     else:
                         raise ValueError(f"Invalid deck index: {index}")
-            elif remove_index is not None:
-                # Handle single index removal
-                if 0 <= remove_index < len(bot.deck):
-                    bot.deck.pop(remove_index)
-                else:
-                    raise ValueError(f"Invalid deck index: {remove_index}")
-            else:
-                # Handle card addition
+            # Handle card addition
+            elif cards is not None:
                 for card_dict in cards:
                     try:
                         action_type = ActionType[card_dict['action_type']]
@@ -545,6 +566,8 @@ class Game:
                         self.modify_deck(bot, add_card=card)
                     except (KeyError, ValueError) as e:
                         raise ValueError(f"Invalid card format: {e}")
+            else:
+                raise ValueError("Either cards or removed_ids parameter required for MODIFY_DECK")
 
         elif action_type == ControllerActionType.CREATE_BOT:
             if self.costs['new_bot'] > controller.get_total_resources():
@@ -554,7 +577,8 @@ class Game:
             controller.bots.append(new_bot)
             self.map[new_position.y][new_position.x].bots.add(new_bot)
             controller.deduct_resources(self.costs['new_bot'])
-            
+
+        print(f"PCA, hour now: {self.hour}")    
         self.log_event(f"Controller {controller.id} performed {action_type.name}")
 
     def advance_time(self, hours: int) -> bool:
@@ -562,7 +586,8 @@ class Game:
         Returns False if advancing time would exceed the current day."""
         if self.hour + hours > self.hours_per_day:
             return False
-            
+        
+        print(f"Advancing time {hours} hours. From {self.hour}.")
         self.hour += hours
         if self.hour >= self.hours_per_day:
             self.hour = 0

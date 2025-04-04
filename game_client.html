@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SpaceDew Game Client</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Roboto:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
@@ -231,6 +232,7 @@
             border: 2px solid var(--neon-green-dim);
             border-radius: 8px;
             box-shadow: inset 0 0 20px rgba(0,0,0,0.3);
+            margin-top: 20px;
         }
 
         .cell {
@@ -244,23 +246,64 @@
             position: relative;
             background-color: var(--base-medium);
             border: 1px solid var(--base-light);
+            border-radius: 4px;
             transition: all 0.3s ease;
+            padding: 4px;
+            overflow: hidden;
         }
 
         .cell:hover {
             transform: scale(1.05);
-            z-index: 1;
+            z-index: 10;
             box-shadow: 0 0 10px rgba(57, 255, 20, 0.3);
         }
 
-        .coordinates {
+        .cell .coordinates {
             position: absolute;
             top: 2px;
             left: 2px;
             color: var(--text-color);
             font-size: 10px;
             font-family: 'Share Tech Mono', monospace;
-            opacity: 0.7;
+            opacity: 0.9;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 1px 3px;
+            border-radius: 2px;
+            z-index: 2;
+        }
+
+        .cell .bot-label {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background-color: var(--base-dark);
+            color: var(--neon-green);
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-size: 10px;
+            font-family: 'Share Tech Mono', monospace;
+            border: 1px solid var(--neon-green-dim);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+            z-index: 2;
+        }
+
+        .cell .asset-label {
+            color: var(--text-color);
+            text-align: center;
+            margin: 2px 0;
+            font-weight: bold;
+            font-family: 'Share Tech Mono', monospace;
+            text-shadow: 
+                -1px -1px 2px rgba(0, 0, 0, 0.8),
+                1px -1px 2px rgba(0, 0, 0, 0.8),
+                -1px 1px 2px rgba(0, 0, 0, 0.8),
+                1px 1px 2px rgba(0, 0, 0, 0.8);
+            background-color: rgba(0, 0, 0, 0.4);
+            padding: 2px 4px;
+            border-radius: 2px;
+            width: 100%;
+            z-index: 2;
         }
 
         .bot-label {
@@ -536,128 +579,436 @@
         .tab-content.active {
             display: block;
         }
+
+        /* Help Button and Modal Styles */
+        .help-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #3a3a3a 0%, #2a2a2a 100%);
+            border: 2px solid var(--neon-green);
+            color: var(--neon-green);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 1000;
+            box-shadow: 
+                0 2px 4px rgba(0,0,0,0.3),
+                inset 0 1px 1px rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .help-button:hover {
+            background: linear-gradient(145deg, #404040 0%, #303030 100%);
+            transform: translateY(-1px);
+            box-shadow: 
+                0 4px 8px rgba(57, 255, 20, 0.2),
+                inset 0 1px 1px rgba(255,255,255,0.2);
+        }
+
+        .help-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            max-width: 800px;
+            max-height: 80vh;
+            background: var(--base-medium);
+            border: 2px solid var(--neon-green);
+            border-radius: 8px;
+            padding: 20px;
+            z-index: 1001;
+            overflow-y: auto;
+            box-shadow: 
+                0 0 20px rgba(0,0,0,0.5),
+                inset 0 0 10px rgba(57, 255, 20, 0.1);
+        }
+
+        .help-modal::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                linear-gradient(45deg, 
+                    rgba(139, 69, 19, 0.05),
+                    rgba(139, 69, 19, 0.1)
+                ),
+                url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1IiBoZWlnaHQ9IjUiPgo8cmVjdCB3aWR0aD0iNSIgaGVpZ2h0PSI1IiBmaWxsPSIjMjIyIj48L3JlY3Q+CjxwYXRoIGQ9Ik0wIDVMNSAwWk02IC00TDQgNlpNLTQgNkw2IC00WiIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjEiPjwvcGF0aD4KPC9zdmc+');
+            border-radius: 6px;
+            z-index: -1;
+            opacity: 0.1;
+        }
+
+        .help-modal-content {
+            font-family: 'Share Tech Mono', monospace;
+            color: var(--text-color);
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        .help-modal h2 {
+            color: var(--neon-green);
+            margin-top: 0;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px var(--neon-green-dim);
+        }
+
+        .help-modal-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 30px;
+            height: 30px;
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .help-modal-close:hover {
+            color: var(--neon-green);
+            transform: scale(1.1);
+        }
+
+        .help-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+        }
+
+        /* Turn Grid Styles */
+        .turn-grid {
+            background: var(--base-medium);
+            border: 2px solid var(--base-light);
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        .turn-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .turn-table td {
+            width: 60px;
+            height: 40px;
+            text-align: center;
+            vertical-align: middle;
+            border: 1px solid var(--base-light);
+            position: relative;
+        }
+
+        .bot-row td {
+            background: var(--base-dark);
+        }
+
+        .bot-label {
+            position: absolute;
+            left: 4px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--neon-green);
+            font-size: 0.8em;
+            text-align: left;
+        }
+
+        .card-slot {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.8em;
+            color: var(--neon-green);
+            text-align: center;
+            padding: 0 4px;
+        }
+
+        .card-slot:hover {
+            background: var(--base-light);
+        }
+
+        .card-slot.marked-for-removal {
+            position: relative;
+        }
+
+        .card-slot.marked-for-removal::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 0, 0, 0.3);
+        }
+
+        .hour-marker {
+            color: var(--text-color);
+            font-size: 0.9em;
+            position: relative;
+        }
+
+        .hour-marker::after {
+            content: '|';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--base-light);
+        }
+
+        .hour-marker.awake {
+            color: var(--retro-orange);
+        }
+
+        .hour-selector {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            height: 40px;
+            padding: 0;
+        }
+
+        .hour-selector .day-hour {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.8em;
+            line-height: 1;
+            padding: 2px;
+        }
+
+        .hour-selector .day-hour .day {
+            transform: translateX(-4px) translateY(2px);
+        }
+
+        .hour-selector .day-hour .hour {
+            transform: translateX(4px) translateY(-2px);
+        }
+
+        .hour-selector .day-hour .slash {
+            position: absolute;
+            font-size: 1.2em;
+            color: var(--base-light);
+        }
+
+        .hour-selector:hover {
+            background: var(--base-light);
+        }
+
+        .hour-selector.selected {
+            background: var(--retro-orange);
+            color: var(--base-dark);
+        }
+
+        .hour-selector.selected .day-hour .day,
+        .hour-selector.selected .day-hour .slash {
+            color: var(--base-dark);
+        }
+
+        .add-card-button {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--base-dark);
+            border: 1px dashed var(--base-light);
+            color: var(--neon-green);
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .add-card-button:hover {
+            border-color: var(--neon-green);
+            box-shadow: var(--border-glow);
+        }
+
+        .play-button {
+            margin-top: 20px;
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(145deg, var(--neon-green-dim) 0%, var(--neon-green) 100%);
+            border: none;
+            border-radius: 4px;
+            color: var(--base-dark);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 18px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        /* Card Creation Modal Styles */
+        .card-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--base-medium);
+            border: 2px solid var(--neon-green);
+            border-radius: 8px;
+            padding: 20px;
+            z-index: 1001;
+            width: 300px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        .card-modal h3 {
+            color: var(--neon-green);
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        .card-modal select {
+            width: 100%;
+            margin-bottom: 15px;
+            background: var(--base-dark);
+            border: 1px solid var(--base-light);
+            color: var(--text-color);
+            padding: 8px;
+            border-radius: 4px;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        .card-modal select:focus {
+            border-color: var(--neon-green);
+            box-shadow: var(--border-glow);
+        }
+
+        .card-modal button {
+            width: 100%;
+            margin-top: 10px;
+            padding: 10px;
+            background: var(--neon-green);
+            color: var(--base-dark);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Share Tech Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .card-modal button:hover {
+            background: var(--neon-green-dim);
+            box-shadow: var(--border-glow);
+        }
+
+        .card-modal button.cancel {
+            background: var(--base-light);
+            color: var(--text-color);
+            margin-top: 5px;
+        }
+
+        .card-modal button.cancel:hover {
+            background: var(--base-dark);
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>SpaceDew Game Client</h1>
+        <h1>Sleep Pod Farmer - <span id="gameStatusTitle">Day 1 Hour 1</span></h1>
+        <button id="help-button" class="help-button" onclick="showHelp()">?</button>
+        
+        <div class="turn-grid">
+            <table class="turn-table">
+                <tbody>
+                    <!-- Bot rows will be inserted here -->
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="25">
+                            <button class="play-button" id="play-button">Play Turn</button>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <div id="card-modal" class="card-modal">
+            <h3>Add New Card</h3>
+            <select id="action-type">
+                <option value="MOVE">Move</option>
+                <option value="HARVEST">Harvest</option>
+                <option value="PLANT">Plant</option>
+            </select>
+            <div id="direction-container">
+                <select id="direction">
+                    <option value="NORTH">North</option>
+                    <option value="SOUTH">South</option>
+                    <option value="EAST">East</option>
+                    <option value="WEST">West</option>
+                </select>
+            </div>
+            <div id="asset-container" style="display: none;">
+                <select id="asset-type">
+                    <!-- Will be populated by JavaScript -->
+                </select>
+            </div>
+            <button id="add-card-confirm">Add Card</button>
+            <button id="cancel-card" class="cancel">Cancel</button>
+        </div>
         
         <div class="top-section">
             <div class="left-column">
-                
                 <div class="panel">
                     <h2 id="gameStatusTitle">Game Status</h2>
-                    
                     <div id="gameStatus" class="scrollable-summary">
                         <!-- Game status will be inserted here -->
                     </div>
                 </div>
 
-                
-                <div class="panel controls">
-                    <h2>Controls</h2>
-                   
-                    <div class="game-controls">
-                        <div class="control-tabs">
-                            <button class="tab-button active" data-tab="bot-actions">RUN</button>
-                            <button class="tab-button" data-tab="edit-deck">EDIT</button>
-                            <button class="tab-button" data-tab="create-bot">NEW</button>
-                        </div>
-
-                        <div id="bot-actions" class="tab-content active">
-                            <div class="control-group">
-                                <label for="energy-points">Energy Points:</label>
-                                <input type="number" id="energy-points" min="1" value="1">
-                            </div>
-                        </div>
-
-                        <div id="edit-deck" class="tab-content">
-                            <div class="control-group">
-                                <label for="bot-id">Bot ID:</label>
-                                <input type="number" id="bot-id" min="0" value="0">
-                            </div>
-                            <div class="control-group">
-                                <label>Modification Type:</label>
-                                <div class="radio-group">
-                                    <input type="radio" id="add-card" name="modification-type" value="add" checked>
-                                    <label for="add-card">Add Card</label>
-                                    <input type="radio" id="remove-card" name="modification-type" value="remove">
-                                    <label for="remove-card">Remove Card</label>
-                                </div>
-                            </div>
-                            <div id="add-card-controls">
-                                <div class="control-group">
-                                    <label>Action Type:</label>
-                                    <select id="cardActionType">
-                                        <option value="MOVE">Move</option>
-                                        <option value="HARVEST">Harvest</option>
-                                        <option value="PLANT">Plant</option>
-                                    </select>
-                                </div>
-                                <div class="control-group" id="moveParameters">
-                                    <label>Direction:</label>
-                                    <select id="direction">
-                                        <option value="NORTH">North</option>
-                                        <option value="SOUTH">South</option>
-                                        <option value="EAST">East</option>
-                                        <option value="WEST">West</option>
-                                        <option value="RANDOM">Random</option>
-                                    </select>
-                                </div>
-                                <div class="control-group" id="assetParameters" style="display: none;">
-                                    <label>Asset Type:</label>
-                                    <select id="assetType">
-                                        <option value="ORE">Ore</option>
-                                        <option value="PLANT">Plant</option>
-                                        <option value="COAL">Coal</option>
-                                    </select>
-                                </div>
-                                <button type="button" onclick="addCardToList()" class="secondary-button">Add Card to List</button>
-                                <div class="selected-cards-list">
-                                    <label>Selected Cards:</label>
-                                    <div id="selectedCardsList" class="card-list"></div>
-                                </div>
-                            </div>
-                            <div id="remove-card-controls" style="display: none;">
-                                <div class="control-group">
-                                    <label>Cards to Remove (hold Ctrl/Cmd to select multiple):</label>
-                                    <select id="cardToRemove" multiple size="5"></select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div id="create-bot" class="tab-content">
-                            <p>Creates a new bot at your starting position.</p>
-                            <p>Cost: 100 minerals</p>
-                        </div>
-
-                        <div class="control-group">
-                            <button id="submit-action" class="action-button">Submit Action</button>
-                        </div>
-                    </div>
-
-                    <div class="panel">
-                        <h2 id="levelTitle">Level</h2>
-                        
-                        <div class="form-group">
-                            <label>Goals:</label>
-                            <div id="gameConfig" class="scrollable-summary">
-                                <!-- Victory conditions will be inserted here -->
-                            </div>
-                        </div>
-
-                        <div class="form-group level-select-group">
-                            <label for="levelSelect">Change Level:</label>
-                            <div class="level-controls">
-                                <select id="levelSelect"></select>
-                                <button onclick="restartGame()" class="restart-button">Restart Level</button>
-                            </div>
-                        </div>
-                    </div>
-
+                <div class="panel">
+                    <h2 id="levelTitle">Level</h2>
+                    
                     <div class="form-group">
-                        <label for="controllerId">Controller ID:</label>
-                        <input type="number" id="controllerId" value="0" min="0">
+                        <label>Goals:</label>
+                        <div id="gameConfig" class="scrollable-summary">
+                            <!-- Victory conditions will be inserted here -->
+                        </div>
+                    </div>
+
+                    <div class="form-group level-select-group">
+                        <label for="levelSelect">Change Level:</label>
+                        <div class="level-controls">
+                            <select id="levelSelect"></select>
+                            <button onclick="restartGame()" class="restart-button">Restart Level</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -684,231 +1035,512 @@
         </div>
     </div>
 
+    <div id="help-modal" class="help-modal">
+        <button class="help-modal-close" onclick="hideHelp()">×</button>
+        <div class="help-modal-content">
+            <h2>SpaceDew Help</h2>
+            <div id="helpText"></div>
+        </div>
+    </div>
+    <div class="help-overlay" id="helpOverlay" onclick="hideHelp()"></div>
+
     <script>
         // Asset type colors
         const ASSET_COLORS = {
-            'ORE': "#c17f59",      // Muted brownish orange
-            'PLANT': "#1a9922",    // Darker, more muted green
-            'COAL': "#151820",     // Very dark blue-black
-            'ORE_SEEDLING': "#8b5b3f",  // Darker brown
-            'PLANT_SEEDLING': "#0f5913", // Dark green
-            'COAL_SEEDLING': "#0a0c10"   // Darkest blue-black
+            'PLANT': "#228B22",       // Forest green for any plant
+            'PLANT_SEEDLING': "#98FB98", // Light green for any seedling
+            'TOMATO': "#228B22",      // Forest green
+            'POTATO': "#228B22",      // Forest green
+            'CORN': "#228B22",        // Forest green
+            'TOMATO_SEED': "#98FB98", // Light green
+            'POTATO_SEED': "#98FB98", // Light green
+            'CORN_SEED': "#98FB98",   // Light green
+            'COAL': "#666666",        // Medium gray
+            'IRON': "#CD853F",        // Peru (brownish)
+            'COPPER': "#B87333",      // Copper
+            'COAL_ORE': "#A9A9A9",    // Darker gray
+            'IRON_ORE': "#DEB887",    // Burlywood (lighter brown)
+            'COPPER_ORE': "#DAA520"   // Goldenrod
         };
 
-        // Add action parameters for each action type
-        const actionParameters = {
-            'TAKE_BOT_ACTIONS': `
-                <div class="form-group">
-                    <label>Energy Points (1 hour each):</label>
-                    <input type="number" id="energyPoints" min="1" max="5" value="1">
-                </div>
-            `,
-            'MODIFY_DECK': `
-                <div class="form-group horizontal">
-                    <div>
-                        <label>Bot ID (1 hour):</label>
-                        <input type="number" id="botId" min="0" value="0">
-                    </div>
-                    <div>
-                        <label>Modification Type:</label>
-                        <input type="radio" name="modType" value="add" id="addCard" checked>
-                        <label for="addCard" style="display: inline;">Add Card</label>
-                        <input type="radio" name="modType" value="remove" id="removeCard">
-                        <label for="removeCard" style="display: inline;">Remove Card</label>
-                    </div>
-                </div>
-                <div id="addCardInputs">
-                    <div class="form-group">
-                        <label>Action Type:</label>
-                        <select id="cardActionType">
-                            <option value="MOVE">Move</option>
-                            <option value="HARVEST">Harvest</option>
-                            <option value="PLANT">Plant</option>
-                        </select>
-                    </div>
-                    <div class="form-group" id="moveParameters">
-                        <label>Direction:</label>
-                        <select id="direction">
-                            <option value="NORTH">North</option>
-                            <option value="SOUTH">South</option>
-                            <option value="EAST">East</option>
-                            <option value="WEST">West</option>
-                            <option value="RANDOM">Random</option>
-                        </select>
-                    </div>
-                    <div class="form-group" id="assetParameters" style="display: none;">
-                        <label>Asset Type:</label>
-                        <select id="assetType">
-                            <option value="ORE">Ore</option>
-                            <option value="PLANT">Plant</option>
-                            <option value="COAL">Coal</option>
-                        </select>
-                    </div>
-                    <button type="button" onclick="addCardToList()" class="secondary-button">Add Card to List</button>
-                    <div class="selected-cards-list">
-                        <label>Selected Cards:</label>
-                        <div id="selectedCardsList" class="card-list"></div>
-                    </div>
-                </div>
-                <div id="removeCardInputs" style="display: none;">
-                    <div class="form-group">
-                        <label>Cards to Remove (hold Ctrl/Cmd to select multiple):</label>
-                        <select id="cardToRemove" multiple size="5"></select>
-                    </div>
-                </div>
-            `,
-            'CREATE_BOT': `
-                <div class="form-group">
-                    <label>Create Bot (6 hours):</label>
-                    <p>New bot will be created at controller's starting position.</p>
-                </div>
-            `
-        };
+        let gameState = null;
+        let selectedCardsToRemove = new Set();
+        let currentBotId = null;
+        let sleepHours = 8;
 
-        // Store current game state
-        let currentGameState = null;
+        // Initialize the time track and bot rows
+        function initializeTimeTrack() {
+            const tbody = document.querySelector('.turn-table tbody');
+            tbody.innerHTML = '';
+            
+            // Add hour selector row
+            const selectorRow = document.createElement('tr');
+            selectorRow.className = 'hour-selector-row';
+            
+            // Add empty cell for bot labels
+            const selectorLabelCell = document.createElement('td');
+            selectorRow.appendChild(selectorLabelCell);
+            
+            // Add hour selector cells (1-24)
+            for (let i = 0; i < 24; i++) {
+                const cell = document.createElement('td');
+                cell.className = 'hour-selector';
+                
+                // Calculate day and hour based on current game state
+                const currentHour = gameState ? gameState.hour : 0;
+                const currentDay = gameState ? gameState.day : 0;
+                const targetHour = currentHour + i;  // Show the hour we'll sleep through
+                const day = currentDay + Math.floor(targetHour / 24);
+                const hour = targetHour % 24;
+                
+                // Create day/hour display
+                const dayHourDiv = document.createElement('div');
+                dayHourDiv.className = 'day-hour';
+                
+                const daySpan = document.createElement('span');
+                daySpan.className = 'day';
+                daySpan.textContent = day;
+                
+                const slashSpan = document.createElement('span');
+                slashSpan.className = 'slash';
+                slashSpan.textContent = '/';
+                
+                const hourSpan = document.createElement('span');
+                hourSpan.className = 'hour';
+                hourSpan.textContent = hour;
+                
+                dayHourDiv.appendChild(daySpan);
+                dayHourDiv.appendChild(slashSpan);
+                dayHourDiv.appendChild(hourSpan);
+                cell.appendChild(dayHourDiv);
+                
+                // Store the number of hours to sleep (1 more than the index)
+                cell.dataset.hour = i + 1;
+                
+                // Mark waking hours (6-22)
+                if (hour >= 6 && hour <= 22) {
+                    cell.classList.add('awake');
+                }
+                
+                cell.addEventListener('click', () => {
+                    // Remove selected class from all cells
+                    document.querySelectorAll('.hour-selector').forEach(c => c.classList.remove('selected'));
+                    // Add selected class to clicked cell
+                    cell.classList.add('selected');
+                    // Calculate sleep hours based on difference between clicked hour and current hour
+                    const currentHour = gameState ? gameState.hour : 0;
+                    const clickedHour = targetHour;
+                    sleepHours = (clickedHour - currentHour) + 1;
+                });
+                
+                selectorRow.appendChild(cell);
+            }
+            
+            tbody.appendChild(selectorRow);
+        }
+
+        // Initialize bot rows
+        function initializeBotRows() {
+            const tbody = document.querySelector('.turn-table tbody');
+            
+            // Remove all existing bot rows (keep the hour selector row)
+            const hourSelectorRow = tbody.querySelector('.hour-selector-row');
+            tbody.innerHTML = '';
+            if (hourSelectorRow) {
+                tbody.appendChild(hourSelectorRow);
+            }
+            
+            if (!gameState || !gameState.controllers) return;
+            
+            const controller = gameState.controllers[0]; // Using first controller for now
+            
+            for (let botId = 0; botId < controller.bots.length; botId++) {
+                const bot = controller.bots[botId];
+                const row = document.createElement('tr');
+                row.className = 'bot-row';
+                
+                // Add bot label cell
+                const labelCell = document.createElement('td');
+                const label = document.createElement('div');
+                label.className = 'bot-label';
+                label.textContent = `Bot ${botId}`;
+                labelCell.appendChild(label);
+                row.appendChild(labelCell);
+                
+                // Add cards
+                for (let i = 0; i < bot.deck.length; i++) {
+                    const card = bot.deck[i];
+                    const cell = document.createElement('td');
+                    const cardSlot = document.createElement('div');
+                    cardSlot.className = 'card-slot';
+                    cardSlot.textContent = formatCard(card);
+                    cardSlot.dataset.botId = botId;
+                    cardSlot.dataset.cardIndex = i;
+                    
+                    cardSlot.addEventListener('click', () => toggleCardRemoval(cardSlot));
+                    cell.appendChild(cardSlot);
+                    row.appendChild(cell);
+                }
+                
+                // Add the "+" button
+                const addCell = document.createElement('td');
+                const addButton = document.createElement('div');
+                addButton.className = 'add-card-button';
+                addButton.textContent = '+';
+                addButton.dataset.botId = botId;
+                addButton.addEventListener('click', () => showCardModal(botId));
+                addCell.appendChild(addButton);
+                row.appendChild(addCell);
+                
+                tbody.insertBefore(row, tbody.firstChild);
+            }
+        }
 
         function formatCard(card) {
-            const actionType = card.action_type;
-            const param = card.parameter;
+            if (card.action_type === 'MOVE') {
+                return `M${card.parameter[0]}`; // M for Move, first letter of direction
+            } else if (card.action_type === 'HARVEST') {
+                return `H${card.parameter[0]}`; // H for Harvest, first letter of asset
+            } else if (card.action_type === 'PLANT') {
+                return `P${card.parameter[0]}`; // P for Plant, first letter of asset
+            }
+            return card.action_type[0];
+        }
+
+        // Toggle card removal
+        function toggleCardRemoval(cardSlot) {
+            const botId = cardSlot.dataset.botId;
+            const cardIndex = cardSlot.dataset.cardIndex;
+            const key = `${botId}-${cardIndex}`;
+            
+            if (selectedCardsToRemove.has(key)) {
+                selectedCardsToRemove.delete(key);
+                cardSlot.classList.remove('marked-for-removal');
+            } else {
+                selectedCardsToRemove.add(key);
+                cardSlot.classList.add('marked-for-removal');
+            }
+        }
+
+        // Show card creation modal
+        function showCardModal(botId) {
+            currentBotId = botId;
+            const modal = document.getElementById('card-modal');
+            modal.style.display = 'block';
+            
+            // Reset selections
+            document.getElementById('action-type').value = 'MOVE';
+            document.getElementById('direction').value = 'NORTH';
+            updateCardModalFields();
+        }
+
+        // Update card modal fields based on action type
+        function updateCardModalFields() {
+            const actionType = document.getElementById('action-type').value;
+            const directionDiv = document.getElementById('direction-container');
+            const assetDiv = document.getElementById('asset-container');
             
             if (actionType === 'MOVE') {
-                return `Move ${param === 'RANDOM' ? 'Random' : param.toLowerCase()}`;
-            } else if (actionType === 'HARVEST') {
-                return `Harvest ${param.toLowerCase()}`;
-            } else if (actionType === 'PLANT') {
-                return `Plant ${param.toLowerCase()}`;
-            }
-            return 'Unknown card';
-        }
-
-        function updateCardList() {
-            if (!currentGameState) return;
-            
-            const botId = parseInt(document.getElementById('bot-id').value);
-            const controller = currentGameState.controllers[0]; // Assuming we're working with the first controller
-            const select = document.getElementById('cardToRemove');
-            
-            if (!controller || botId >= controller.bots.length) {
-                select.innerHTML = '<option value="">No bot found</option>';
-                return;
-            }
-            
-            const bot = controller.bots[botId];
-            select.innerHTML = bot.deck.map((card, index) => 
-                `<option value="${index}">[${index}] ${formatCard(card)}</option>`
-            ).join('');
-        }
-
-        // Store selected cards for adding
-        let selectedCardsToAdd = [];
-
-        function addCardToList() {
-            const actionType = document.getElementById('cardActionType').value;
-            const parameter = actionType === 'MOVE' 
-                ? document.getElementById('direction').value
-                : document.getElementById('assetType').value;
-            
-            const card = {
-                action_type: actionType,
-                parameter: parameter
-            };
-            
-            selectedCardsToAdd.push(card);
-            updateSelectedCardsList();
-        }
-
-        function removeCardFromList(index) {
-            selectedCardsToAdd.splice(index, 1);
-            updateSelectedCardsList();
-        }
-
-        function updateSelectedCardsList() {
-            const listElement = document.getElementById('selectedCardsList');
-            listElement.innerHTML = selectedCardsToAdd.map((card, index) => `
-                <div class="card-list-item">
-                    <span>${formatCard(card)}</span>
-                    <button class="remove-card" onclick="removeCardFromList(${index})">×</button>
-                </div>
-            `).join('');
-        }
-
-        // Update parameters form based on selected action type
-        document.querySelectorAll('.tab-button').forEach(button => {
-            button.addEventListener('click', () => {
-                // Update button states
-                document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
-                button.classList.add('active');
+                directionDiv.style.display = 'block';
+                assetDiv.style.display = 'none';
                 
-                // Update content visibility
-                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-                document.getElementById(button.dataset.tab).classList.add('active');
-            });
-        });
-
-        function updateModificationInputs() {
-            const addInputs = document.getElementById('addCardInputs');
-            const removeInputs = document.getElementById('removeCardInputs');
-            const modType = document.querySelector('input[name="modType"]:checked').value;
-            
-            if (modType === 'add') {
-                addInputs.style.display = 'block';
-                removeInputs.style.display = 'none';
-                updateCardParameters();
-                selectedCardsToAdd = []; // Reset selected cards when switching modes
-                updateSelectedCardsList();
+                // Update direction options
+                const directionSelect = document.getElementById('direction');
+                directionSelect.innerHTML = `
+                    <option value="NORTH">North</option>
+                    <option value="SOUTH">South</option>
+                    <option value="EAST">East</option>
+                    <option value="WEST">West</option>
+                `;
             } else {
-                addInputs.style.display = 'none';
-                removeInputs.style.display = 'block';
-                updateCardList();
+                directionDiv.style.display = 'none';
+                assetDiv.style.display = 'block';
+                
+                // Update asset options based on action type
+                const assetSelect = document.getElementById('asset-type');
+                if (actionType === 'HARVEST') {
+                    assetSelect.innerHTML = `
+                        <option value="ORE">Ore</option>
+                        <option value="PLANT">Plant</option>
+                        <option value="COAL">Coal</option>
+                    `;
+                } else if (actionType === 'PLANT') {
+                    assetSelect.innerHTML = `
+                        <option value="ORE_SEEDLING">Ore Seedling</option>
+                        <option value="PLANT_SEEDLING">Plant Seedling</option>
+                        <option value="COAL_SEEDLING">Coal Seedling</option>
+                    `;
+                }
             }
         }
 
-        function updateCardParameters() {
-            const actionType = document.getElementById('cardActionType').value;
-            const moveParams = document.getElementById('moveParameters');
-            const assetParams = document.getElementById('assetParameters');
+        // Handle card creation
+        function handleCardCreation() {
+            const actionType = document.getElementById('action-type').value;
+            let parameters = {};
             
             if (actionType === 'MOVE') {
-                moveParams.style.display = 'block';
-                assetParams.style.display = 'none';
+                parameters.direction = document.getElementById('direction').value;
             } else {
-                moveParams.style.display = 'none';
-                assetParams.style.display = 'block';
+                parameters.asset_type = document.getElementById('asset-type').value;
+            }
+            
+            // Send request to add card
+            const orders = [{
+                controller_id: 0,
+                action_type: 'MODIFY_DECK',
+                parameters: {
+                    bot_id: parseInt(currentBotId),
+                    cards: [{
+                        action_type: actionType,
+                        parameter: actionType === 'MOVE' ? parameters.direction : parameters.asset_type
+                    }]
+                }
+            }];
+            
+            submitTurn(orders);
+            document.getElementById('card-modal').style.display = 'none';
+        }
+
+        // Submit turn
+        async function submitTurn(additionalOrders = []) {
+            const orders = [...additionalOrders];
+            
+            // Add card removal orders if any cards are marked for removal
+            if (selectedCardsToRemove.size > 0) {
+                const removalsByBot = new Map();
+                
+                // Group removals by bot
+                for (const key of selectedCardsToRemove) {
+                    const [botId, cardIndex] = key.split('-');
+                    if (!removalsByBot.has(botId)) {
+                        removalsByBot.set(botId, []);
+                    }
+                    removalsByBot.get(botId).push(parseInt(cardIndex));
+                }
+                
+                // Create removal orders for each bot
+                for (const [botId, indices] of removalsByBot) {
+                    orders.push({
+                        controller_id: 0,
+                        action_type: 'MODIFY_DECK',
+                        parameters: {
+                            bot_id: parseInt(botId),
+                            removed_ids: indices
+                        }
+                    });
+                }
+            }
+            
+            // Add sleep order if no other orders are present
+            if (orders.length === 0) {
+                orders.push({
+                    controller_id: 0,
+                    action_type: 'TAKE_BOT_ACTIONS',
+                    parameters: {
+                        energy_points: sleepHours
+                    }
+                });
+            }
+            
+            try {
+                const response = await fetch('/game/turn', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ orders })
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    gameState = result;
+                    selectedCardsToRemove.clear();
+                    initializeTimeTrack();
+                    initializeBotRows();
+                    renderGameGrid(result);
+                    document.getElementById('gameStatus').innerHTML = generateGameStatus(result);
+                    document.getElementById('gameStatusTitle').innerHTML = generateGameTime(result);
+                    document.getElementById('gameConfig').innerHTML = generateGameConfig(result);
+                    document.getElementById('eventLog').innerHTML = generateEventLog(result);
+                    document.getElementById('rawState').innerHTML = `<pre><code class="language-json">${JSON.stringify(result, null, 2)}</code></pre>`;
+                    hljs.highlightElement(document.querySelector('#rawState code'));
+                } else {
+                    const error = await response.text();
+                    document.getElementById('error').textContent = error;
+                }
+            } catch (error) {
+                console.error('Error submitting turn:', error);
+                document.getElementById('error').textContent = error.message;
             }
         }
 
+        // Event listeners
+        document.getElementById('action-type').addEventListener('change', updateCardModalFields);
+        document.getElementById('add-card-confirm').addEventListener('click', handleCardCreation);
+        document.getElementById('cancel-card').addEventListener('click', () => {
+            document.getElementById('card-modal').style.display = 'none';
+        });
+        
+        document.getElementById('play-button').addEventListener('click', () => submitTurn());
+
+        // Help modal functions
+        function showHelp() {
+            document.getElementById('help-modal').style.display = 'block';
+            document.getElementById('helpOverlay').style.display = 'block';
+            
+            // Set help text
+            document.getElementById('helpText').innerHTML = `
+Your space ship, the "Stardew Valley", has crashed!
+You are able to stay alive inside the wreck mostly by sleeping in your suspended animation pod to reduce resource usage.
+To gather enough resources to survive and eventually repair your ship, you'll need to gather and grow from the outside world which you cannot visit.
+Luckily, you have built a Bot which can take your orders in the outside world and perform your tasks.
+You will need to give it its orders then return to sleep while it performs them.
+The longer you can let it run while you sleep the more efficient your operation will be, but the harder it will be adapt to any changes or challenges to the assumptions underlying your orders.
+
+Your primary control is how to spend the hours of your days. While you sleep your bots will perform your given tasks. Reprogramming the bots or building new ones will require you to be awake, which consumes your precious biomass.
+
+Resources:
+• Biomass: perform waking tasks
+• Energy: perform bot actions and tasks
+• Metal: build new machinery and components
+
+Controls:
+• Bot Actions: let N hours pass, consuming no biomass while bots work
+• Edit Deck: reconfigure your bots, consuming biomass
+• Create Bot: Create new bot out of metal
+
+Each scenario will have a set of goals to be accomplished - generally needed amounts of resources.`;
+        }
+
+        function hideHelp() {
+            document.getElementById('help-modal').style.display = 'none';
+            document.getElementById('helpOverlay').style.display = 'none';
+        }
+
+        // Initialize the interface
+        initializeTimeTrack();
+        
+        // Load initial game state
+        async function loadGameState() {
+            try {
+                const response = await fetch('/game/state');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch game state');
+                }
+                const state = await response.json();
+                gameState = state;
+                
+                // Initialize all displays
+                initializeTimeTrack();
+                initializeBotRows();
+                renderGameGrid(state);
+                document.getElementById('gameStatus').innerHTML = generateGameStatus(state);
+                document.getElementById('gameStatusTitle').innerHTML = generateGameTime(state);
+                document.getElementById('gameConfig').innerHTML = generateGameConfig(state);
+                document.getElementById('eventLog').innerHTML = generateEventLog(state);
+                document.getElementById('rawState').innerHTML = `<pre><code class="language-json">${JSON.stringify(state, null, 2)}</code></pre>`;
+                hljs.highlightElement(document.querySelector('#rawState code'));
+                
+                // Load levels
+                await loadLevels();
+            } catch (error) {
+                console.error('Error loading game state:', error);
+                document.getElementById('error').textContent = error.message;
+            }
+        }
+
+        // Load initial state
+        loadGameState();
+
+        // Game grid rendering functions
+        function renderGameGrid(gameState) {
+            const gridContainer = document.getElementById('gameGrid');
+            const width = gameState.map_size.width;
+            const height = gameState.map_size.height;
+            
+            gridContainer.innerHTML = '';
+            gridContainer.className = 'game-grid';
+            gridContainer.style.gridTemplateColumns = `repeat(${width}, 60px)`;
+            
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    const cell = gameState.map[y][x];
+                    const cellDiv = document.createElement('div');
+                    cellDiv.className = 'cell';
+                    
+                    // Set background color based on assets
+                    if (cell.assets && cell.assets.length > 0) {
+                        const assetType = cell.assets[0].type;
+                        // console.log(`Cell (${x},${y}) has asset type: ${assetType}, color: ${ASSET_COLORS[assetType]}`);
+                        
+                        // Get the color for this asset type
+                        let color = ASSET_COLORS[assetType];
+                        
+                        // If no specific color found, try to use a generic type color
+                        if (!color && assetType.includes('PLANT')) {
+                            color = ASSET_COLORS['PLANT'];
+                        } else if (!color && assetType.includes('SEEDLING')) {
+                            color = ASSET_COLORS['PLANT_SEEDLING'];
+                        }
+                        
+                        if (color) {
+                            cellDiv.style.setProperty('background-color', color, 'important');
+                            // console.log(`Applied color ${color} to cell (${x},${y})`);
+                        }
+                    }
+                    
+                    // Add coordinates
+                    const coords = document.createElement('div');
+                    coords.className = 'coordinates';
+                    coords.textContent = `(${x},${y})`;
+                    cellDiv.appendChild(coords);
+                    
+                    // Add bot label if there are bots
+                    if (cell.bots && cell.bots.length > 0) {
+                        const botCounts = {};
+                        cell.bots.forEach(bot => {
+                            botCounts[bot.controller_id] = (botCounts[bot.controller_id] || 0) + 1;
+                        });
+                        
+                        const botLabel = document.createElement('div');
+                        botLabel.className = 'bot-label';
+                        const labels = [];
+                        for (const [controllerId, count] of Object.entries(botCounts)) {
+                            labels.push(count > 1 ? `C${controllerId}×${count}` : `C${controllerId}`);
+                        }
+                        botLabel.textContent = labels.join(' ');
+                        cellDiv.appendChild(botLabel);
+                    }
+                    
+                    // Add asset labels
+                    if (cell.assets && cell.assets.length > 0) {
+                        cell.assets.forEach(asset => {
+                            const assetLabel = document.createElement('div');
+                            assetLabel.className = 'asset-label';
+                            const shortType = asset.type.split('_')[0].substring(0, 3);
+                            assetLabel.textContent = asset.maturity_time !== null 
+                                ? `${shortType}(${asset.maturity_time})`
+                                : `${shortType}×${asset.amount}`;
+                            cellDiv.appendChild(assetLabel);
+                        });
+                    }
+                    
+                    gridContainer.appendChild(cellDiv);
+                }
+            }
+        }
+
+        // Game state display functions
         function generateGameStatus(gameState) {
             let status = [];
             
             // Add controller information
             for (const controller of gameState.controllers) {
-                // Add resources on a single line with abbreviations
-                const resources = Object.entries(controller.resources)
-                    .map(([resource, amount]) => `${resource.substring(0, 3)}: ${amount}`)
-                    .join(' | ');
-                status.push(`${resources}`);
-                
-                // Add deck information for each bot vertically
-                controller.bots.forEach((bot, botIndex) => {
-                    status.push(`<br><br>Bot ${botIndex} deck:`);
-                    bot.deck.forEach((card, cardIndex) => {
-                        let cardDisplay = '';
-                        if (card.action_type === 'MOVE') {
-                            cardDisplay = `Move ${card.parameter === 'RANDOM' ? 'Random' : card.parameter.toLowerCase()}`;
-                        } else if (card.action_type === 'HARVEST') {
-                            cardDisplay = `Harvest ${card.parameter.toLowerCase()}`;
-                        } else if (card.action_type === 'PLANT') {
-                            cardDisplay = `Plant ${card.parameter.toLowerCase()}`;
-                        }
-                        
-                        // Add brackets around the next card to execute
-                        if (cardIndex === 0) {
-                            cardDisplay = `[${cardDisplay}]`;
-                        }
-                        
-                        status.push(`<br> - ${cardDisplay}`);
-                    });
+                // Add resources vertically
+                status.push('Resources:');
+                Object.entries(controller.resources).forEach(([resource, amount]) => {
+                    status.push(`<br>${resource}: ${amount}`);
                 });
             }
             
@@ -923,8 +1555,9 @@
             let status = [];
             
             // Add victory conditions
+            status.push('Goals:');
             for (const [resource, amount] of Object.entries(gameState.victory_conditions)) {
-                status.push(`<br> - ${resource}: ${amount}`);
+                status.push(`<br>${resource}: ${amount}`);
             }
             
             return status.join('');
@@ -960,187 +1593,12 @@
             });
         }
 
-        // Initialize with default action type parameters
-        document.querySelectorAll('.tab-button').forEach(button => {
-            button.addEventListener('click', () => {
-                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-                document.getElementById(button.dataset.tab).classList.add('active');
-            });
-        });
-
-        async function getGameState() {
-            try {
-                const response = await fetch('/game/state');
-                if (!response.ok) {
-                    const error = await response.text();
-                    console.error('Failed to fetch game state:', error);
-                    throw new Error('Failed to fetch game state: ' + error);
-                }
-                const data = await response.json();
-                
-                // Store current game state
-                currentGameState = data;
-                
-                // Update the displays
-                renderGameGrid(data);
-                document.getElementById('gameStatusTitle').innerHTML = generateGameTime(data);
-                document.getElementById('gameStatus').innerHTML = generateGameStatus(data);
-                document.getElementById('gameConfig').innerHTML = generateGameConfig(data);
-                document.getElementById('eventLog').innerHTML = generateEventLog(data);
-                
-                // Update raw state with syntax highlighting
-                const formattedJson = JSON.stringify(data, null, 2);
-                document.getElementById('rawState').innerHTML = `<pre><code class="language-json">${formattedJson}</code></pre>`;
-                hljs.highlightElement(document.querySelector('#rawState code'));
-                
-                // Update card list if we're in remove mode
-                if (document.querySelector('input[name="modType"]:checked')?.value === 'remove') {
-                    updateCardList();
-                }
-            } catch (error) {
-                console.error('Error in getGameState:', error);
-                document.getElementById('error').textContent = 'Error: ' + error.message;
-            }
-        }
-
-        async function submitTurn() {
-            const selectedTab = document.querySelector('.tab-button.active').dataset.tab;
-            let actionType;
-            
-            switch(selectedTab) {
-                case 'bot-actions':
-                    actionType = 'TAKE_BOT_ACTIONS';
-                    break;
-                case 'edit-deck':
-                    actionType = 'MODIFY_DECK';
-                    break;
-                case 'create-bot':
-                    actionType = 'CREATE_BOT';
-                    break;
-            }
-            
-            const controllerId = parseInt(document.getElementById('controllerId').value);
-            
-            let parameters = {};
-            let hourCost = 0;
-            let orders = [];
-            
-            if (actionType === 'TAKE_BOT_ACTIONS') {
-                const energyPoints = parseInt(document.getElementById('energy-points').value);
-                parameters = { energy_points: energyPoints };
-                hourCost = energyPoints; // 1 hour per energy point
-            }
-            else if (actionType === 'MODIFY_DECK') {
-                const botId = parseInt(document.getElementById('bot-id').value);
-                const modType = document.querySelector('input[name="modification-type"]:checked').value;
-                hourCost = 1; // 1 hour for deck modification
-                
-                if (modType === 'add') {
-                    if (selectedCardsToAdd.length === 0) {
-                        document.getElementById('error').textContent = 'Please add at least one card to the list';
-                        return;
-                    }
-                    parameters = {
-                        bot_id: botId,
-                        cards: selectedCardsToAdd
-                    };
-                } else {
-                    const selectedIndices = Array.from(document.getElementById('cardToRemove').selectedOptions)
-                        .map(option => parseInt(option.value));
-                    if (selectedIndices.length === 0) {
-                        document.getElementById('error').textContent = 'Please select at least one card to remove';
-                        return;
-                    }
-                    parameters = {
-                        bot_id: botId,
-                        cards: [],
-                        remove_indices: selectedIndices
-                    };
-                }
-            }
-            else if (actionType === 'CREATE_BOT') {
-                hourCost = 6; // 6 hours for new bot
-                parameters = {};
-            }
-
-            orders = [{
-                controller_id: controllerId,
-                action_type: actionType,
-                parameters: parameters
-            }];
-
-            // Check if we have enough hours
-            const totalHourCost = hourCost;
-                
-            if (currentGameState && 
-                currentGameState.hour + totalHourCost > currentGameState.hours_per_day) {
-                document.getElementById('error').textContent = 
-                    `Not enough hours left in the day (need ${totalHourCost}, have ${currentGameState.hours_per_day - currentGameState.hour})`;
-                return;
-            }
-
-            try {
-                const requestBody = { orders };
-                
-                // Enhanced request logging
-                console.log('Sending request:', JSON.stringify(requestBody, null, 2));
-                if (actionType === 'MODIFY_DECK') {
-                    console.log('Current bot deck before modification:', 
-                        currentGameState.controllers[controllerId].bots[parameters.bot_id].deck);
-                }
-                
-                const response = await fetch('/game/turn', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(requestBody)
-                });
-
-                // Enhanced response logging
-                let responseData;
-                const contentType = response.headers.get("content-type");
-                if (contentType && contentType.includes("application/json")) {
-                    responseData = await response.json();
-                    console.log('Response (JSON):', responseData);
-                    if (actionType === 'MODIFY_DECK') {
-                        console.log('Bot deck after modification attempt:', 
-                            responseData.controllers[controllerId].bots[parameters.bot_id].deck);
-                    }
-                } else {
-                    responseData = await response.text();
-                    console.log('Response (text):', responseData);
-                }
-
-                if (!response.ok) {
-                    document.getElementById('error').textContent = typeof responseData === 'string' ? responseData : JSON.stringify(responseData);
-                    return;
-                }
-
-                // Clear error message and selected cards if successful
-                document.getElementById('error').textContent = '';
-                if (actionType === 'MODIFY_DECK') {
-                    selectedCardsToAdd = [];
-                    updateSelectedCardsList();
-                }
-                
-                // Refresh game state
-                await getGameState();
-                
-            } catch (error) {
-                console.error('Error in submitTurn:', error);
-                document.getElementById('error').textContent = error.message;
-            }
-        }
-
-        // Add level management functions
+        // Level management functions
         async function loadLevels() {
             try {
                 const response = await fetch('/game/levels');
                 if (!response.ok) {
-                    const error = await response.text();
-                    console.error('Failed to fetch levels:', error);
-                    throw new Error('Failed to fetch levels: ' + error);
+                    throw new Error('Failed to fetch levels');
                 }
                 const data = await response.json();
                 
@@ -1170,9 +1628,7 @@
                 
                 if (!response.ok) {
                     const error = await response.text();
-                    console.error('Failed to restart game:', error);
-                    document.getElementById('error').textContent = error;
-                    return;
+                    throw new Error(error);
                 }
 
                 // Clear error message if successful
@@ -1180,11 +1636,17 @@
                 
                 // Update game state
                 const data = await response.json();
-                currentGameState = data;
+                gameState = data;
+                
+                // Update all displays
                 renderGameGrid(data);
+                initializeBotRows();
                 document.getElementById('gameStatus').innerHTML = generateGameStatus(data);
+                document.getElementById('gameStatusTitle').innerHTML = generateGameTime(data);
+                document.getElementById('gameConfig').innerHTML = generateGameConfig(data);
                 document.getElementById('eventLog').innerHTML = generateEventLog(data);
-                document.getElementById('rawState').textContent = JSON.stringify(data, null, 2);
+                document.getElementById('rawState').innerHTML = `<pre><code class="language-json">${JSON.stringify(data, null, 2)}</code></pre>`;
+                hljs.highlightElement(document.querySelector('#rawState code'));
                 
                 // Update the level title
                 document.getElementById('levelTitle').textContent = level;
@@ -1194,105 +1656,6 @@
                 document.getElementById('error').textContent = error.message;
             }
         }
-
-        function renderGameGrid(gameState) {
-            const gridContainer = document.getElementById('gameGrid');
-            const width = gameState.map_size.width;
-            const height = gameState.map_size.height;
-            
-            // Set grid columns
-            gridContainer.innerHTML = '';
-            gridContainer.className = 'game-grid';
-            gridContainer.style.gridTemplateColumns = `repeat(${width}, 60px)`;
-            
-            // Create cells
-            for (let y = 0; y < height; y++) {
-                for (let x = 0; x < width; x++) {
-                    const cell = gameState.map[y][x];
-                    const cellDiv = document.createElement('div');
-                    cellDiv.className = 'cell';
-                    
-                    // Set background color based on assets
-                    if (cell.assets.length > 0) {
-                        const assetType = cell.assets[0].type;
-                        cellDiv.style.backgroundColor = ASSET_COLORS[assetType] || '#9BA2A7';
-                    }
-                    
-                    // Add coordinates
-                    const coords = document.createElement('div');
-                    coords.className = 'coordinates';
-                    coords.textContent = `(${x},${y})`;
-                    cellDiv.appendChild(coords);
-                    
-                    // Add bot label if there are bots
-                    if (cell.bots.length > 0) {
-                        const botCounts = {};
-                        cell.bots.forEach(bot => {
-                            botCounts[bot.controller_id] = (botCounts[bot.controller_id] || 0) + 1;
-                        });
-                        
-                        const botLabel = document.createElement('div');
-                        botLabel.className = 'bot-label';
-                        const labels = [];
-                        for (const [controllerId, count] of Object.entries(botCounts)) {
-                            labels.push(count > 1 ? `C${controllerId}×${count}` : `C${controllerId}`);
-                        }
-                        botLabel.textContent = labels.join(' ');
-                        cellDiv.appendChild(botLabel);
-                    }
-                    
-                    // Add asset labels
-                    cell.assets.forEach(asset => {
-                        const assetLabel = document.createElement('div');
-                        assetLabel.className = 'asset-label';
-                        const shortType = asset.type.split('_')[0].substring(0, 3);
-                        assetLabel.textContent = asset.maturity_time !== null 
-                            ? `${shortType}(${asset.maturity_time})`
-                            : `${shortType}×${asset.amount}`;
-                        cellDiv.appendChild(assetLabel);
-                    });
-                    
-                    gridContainer.appendChild(cellDiv);
-                }
-            }
-        }
-
-        // Initialize game state and levels
-        loadLevels();
-        getGameState();
-
-        // Add event listeners for the modification type radio buttons
-        document.querySelectorAll('input[name="modification-type"]').forEach(radio => {
-            radio.addEventListener('change', () => {
-                const addControls = document.getElementById('add-card-controls');
-                const removeControls = document.getElementById('remove-card-controls');
-                if (radio.value === 'add') {
-                    addControls.style.display = 'block';
-                    removeControls.style.display = 'none';
-                    updateCardParameters();
-                } else {
-                    addControls.style.display = 'none';
-                    removeControls.style.display = 'block';
-                    updateCardList();
-                }
-            });
-        });
-
-        // Add event listener for bot ID changes
-        document.getElementById('bot-id').addEventListener('change', () => {
-            if (document.querySelector('input[name="modification-type"]:checked').value === 'remove') {
-                updateCardList();
-            }
-        });
-
-        // Add event listener for card action type changes
-        document.getElementById('cardActionType').addEventListener('change', updateCardParameters);
-
-        // Add event listener for submit action button
-        document.getElementById('submit-action').addEventListener('click', submitTurn);
-
-        // Initial update of card parameters
-        updateCardParameters();
     </script>
 </body>
 </html> 
