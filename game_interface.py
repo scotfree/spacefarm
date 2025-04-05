@@ -252,6 +252,8 @@ class GameInterface:
                 for resource_type, amount in self.game.victory_conditions.items()
             },
             'controllers': [],
+            'state': self.game.state,
+            'victors': self.game.victors,
             'map': []
         }
         

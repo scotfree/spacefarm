@@ -56,7 +56,8 @@ class Game:
         }
         
         self.victory_conditions = config['victory_conditions']
-        
+        self.state = 'active'
+        self.victors = []
         # Add event log
         self.event_log: List[Dict[str, Union[int, str]]] = []
         
@@ -465,7 +466,9 @@ class Game:
                     break
             if victory:
                 print(f"...victory condition met for {controller}...")
-                return controller
+                self.state = 'victory'
+                self.victors.append(controller)
+                # return controller
         return None
 
     def process_controller_turn(self, controller: Controller, action: dict) -> None:

@@ -764,7 +764,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(255, 0, 0, 0.3);
+            background: rgba(255, 0, 0, 0.7);
         }
 
         .hour-marker {
@@ -810,11 +810,14 @@
         }
 
         .hour-selector .day-hour .day {
-            transform: translateX(-4px) translateY(2px);
+            transform: translateX(-5px) translateY(3px);
+            font-size: 0.8em;
+            color: var(--neon-green);
+
         }
 
         .hour-selector .day-hour .hour {
-            transform: translateX(4px) translateY(-2px);
+            transform: translateX(5px) translateY(-3px);
         }
 
         .hour-selector .day-hour .slash {
@@ -1305,7 +1308,11 @@
         // Submit turn
         async function submitTurn(additionalOrders = []) {
             const orders = [...additionalOrders];
-            
+            if (gameState.state !== 'active') {
+                console.log("Game is not active, skipping turn");
+                alert("Game is not active.");
+                return;
+            }
             // Add card removal orders if any cards are marked for removal
             if (selectedCardsToRemove.size > 0) {
                 const removalsByBot = new Map();
@@ -1434,6 +1441,7 @@ Each scenario will have a set of goals to be accomplished - generally needed amo
                 // Initialize all displays
                 initializeTimeTrack();
                 initializeBotRows();
+
                 renderGameGrid(state);
                 document.getElementById('gameStatus').innerHTML = generateGameStatus(state);
                 document.getElementById('gameStatusTitle').innerHTML = generateGameTime(state);
@@ -1533,12 +1541,13 @@ Each scenario will have a set of goals to be accomplished - generally needed amo
 
         // Game state display functions
         function generateGameStatus(gameState) {
-            let status = [];
+            let status = ["STATUS: " + gameState.state + "<br>"];
             
+
             // Add controller information
             for (const controller of gameState.controllers) {
                 // Add resources vertically
-                status.push('Resources:');
+                status.push('<BR>Resources:');
                 Object.entries(controller.resources).forEach(([resource, amount]) => {
                     status.push(`<br>${resource}: ${amount}`);
                 });
